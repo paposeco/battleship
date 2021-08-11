@@ -46,8 +46,8 @@ const pickLocation = function (obj) {
 };
 
 const placeShip = (function () {
-  const ship = shipFleet[0];
-  const shipLength = ship.length;
+  //const ship = shipFleet[0];
+  //const shipLength = ship.length;
   // let randomLocation = pickLocation(newBoard.coordinates).split(",");
   // const row = Number(randomLocation[0]);
   // const column = Number(randomLocation[1]);
@@ -56,35 +56,37 @@ const placeShip = (function () {
   let row;
   let column;
 
-  const whereToCheckRow = function (currentboard) {
+  const whereToCheckRow = function (currentboard, currentship) {
     let array = [];
-    for (let i = 1; i < shipLength; i++) {
+    for (let i = 1; i < currentship.length; i++) {
       const shiftedColumn = column - i;
       if (shiftedColumn < 1) {
         continue;
       }
       const location = row + "," + shiftedColumn;
       const statusOnLocation = currentboard.coordinates[location];
+      console.log(location, statusOnLocation);
       if (statusOnLocation === 0) {
         array.push(shiftedColumn);
       }
     }
-    for (let j = 1; j < shipLength; j++) {
+    for (let j = 1; j < currentship.length; j++) {
       const shiftedColumn = column + j;
       if (shiftedColumn > 10) {
         continue;
       }
       const location = row + "," + shiftedColumn;
       const statusOnLocation = currentboard.coordinates[location];
+      console.log(location, statusOnLocation);
       if (statusOnLocation === 0) {
         array.push(shiftedColumn);
       }
     }
     return array;
   };
-  const whereToCheckColumn = function (currentboard) {
+  const whereToCheckColumn = function (currentboard, currentship) {
     let array = [];
-    for (let i = 1; i < shipLength; i++) {
+    for (let i = 1; i < currentship.length; i++) {
       const shiftedRow = row - i;
       if (shiftedRow < 1) {
         continue;
@@ -95,7 +97,7 @@ const placeShip = (function () {
         array.push(shiftedRow);
       }
     }
-    for (let j = 1; j < shipLength; j++) {
+    for (let j = 1; j < currentship.length; j++) {
       const shiftedRow = row + j;
       if (shiftedRow > 10) {
         continue;
@@ -146,10 +148,10 @@ const placeShip = (function () {
 
   const checkForFit = function (currentship, currentboard) {
     const selectedInitialLocation = row + "," + column;
-    const availableSpacesRow = whereToCheckRow(currentboard)
+    const availableSpacesRow = whereToCheckRow(currentboard, currentship)
       .concat(column)
       .sort(compareNumbers);
-    const availableSpacesColumn = whereToCheckColumn(currentboard)
+    const availableSpacesColumn = whereToCheckColumn(currentboard, currentship)
       .concat(row)
       .sort(compareNumbers);
     // pick randomly row or column (not really random: if row is odd check column if even check row)
@@ -196,7 +198,7 @@ const placeShip = (function () {
     randomLocation = pickLocation(newBoard.coordinates).split(",");
     row = Number(randomLocation[0]);
     column = Number(randomLocation[1]);
-    console.log(boardobj);
+    displayboard(boardobj);
     const selectInitialPlacement = checkForFit(currentship, boardobj);
     console.log(selectInitialPlacement);
     if (!selectInitialPlacement) {
@@ -234,12 +236,30 @@ const placeShip = (function () {
   // changeBoard(newBoard, ship);
 })();
 
-async function setupboard() {
+function setupboard() {
   let newBoard2 = createGameboard("playerA");
-  const teste = await placeShip.changeBoard(newBoard2, shipFleet[0]);
-  const segundoteste = placeShip.changeBoard(newBoard2, shipFleet[1]);
-  console.log(newBoard2);
+  placeShip.changeBoard(newBoard2, shipFleet[0]);
+  placeShip.changeBoard(newBoard2, shipFleet[1]);
+  displayboard(newBoard2);
 }
+
+const displayboard = function (currentboard) {
+  const coord = currentboard.coordinates;
+  for (let i = 1; i <= 10; i++) {
+    console.log(
+      coord[i + "," + 1],
+      coord[i + "," + 2],
+      coord[i + "," + 3],
+      coord[i + "," + 4],
+      coord[i + "," + 5],
+      coord[i + "," + 6],
+      coord[i + "," + 7],
+      coord[i + "," + 8],
+      coord[i + "," + 9],
+      coord[i + "," + 10]
+    );
+  }
+};
 
 setupboard();
 
@@ -247,3 +267,4 @@ setupboard();
 // console.log("segundo");
 // placeShip.changeBoard(newBoard2, shipFleet[1]);
 // console.log(newBoard2.coordinates);
+// if it fails, it should pick a new randomlocation
