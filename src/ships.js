@@ -1,17 +1,5 @@
 //export { createShip };
 
-class Ship {
-  constructor(length) {
-    this.length = length;
-    this.hits = createArrayHits(this.length);
-    this.sunk = checkIfSunk(this.hits);
-  }
-  hit(index) {
-    this.hits[index] = 1;
-    this.sunk = checkIfSunk(this.hits);
-  }
-}
-
 const createArrayHits = function (length) {
   let array = [];
   for (let i = 0; i < length; i++) {
@@ -28,17 +16,34 @@ const checkIfSunk = function (hitsarray) {
   }
 };
 
-const createShip = function (length) {
-  const shipcreated = new Ship(length);
+const createShip = function (length, name) {
+  class Ship {
+    constructor(length, name) {
+      this.length = length;
+      this.name = name;
+      this.hits = createArrayHits(this.length);
+      this.sunk = checkIfSunk(this.hits);
+    }
+    hit(index) {
+      this.hits[index] = 1;
+      this.sunk = checkIfSunk(this.hits);
+    }
+  }
+  const shipcreated = new Ship(length, name);
   return shipcreated;
 };
 
+const shipFleet = function () {
+  const carrier = createShip(5, "carrier");
+  const battleship = createShip(4, "battleship");
+  const destroyer = createShip(3, "destroyer");
+  const submarine = createShip(3, "submarine");
+  const patrolboat = createShip(2, "patrolboat");
+  const shiparray = [carrier, battleship, destroyer, submarine, patrolboat];
+  return shiparray;
+};
+
 // for node
-//module.exports = Ship;
+module.exports = shipFleet;
 
-const oneship = new Ship(4);
-
-oneship.hit(1);
-oneship.hit(0);
-
-console.log(oneship);
+// ships should probably have a unique id
