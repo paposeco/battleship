@@ -9,7 +9,7 @@ const createArrayHits = function (length) {
 };
 
 const checkIfSunk = function (hitsarray) {
-  if (hitsarray.find((element) => element === 0) === undefined) {
+  if (hitsarray.find((element) => element === "x") === undefined) {
     return true;
   } else {
     return false;
@@ -23,6 +23,7 @@ const createShip = function (length, name) {
       this.name = name;
       this.hits = createArrayHits(this.length);
       this.sunk = checkIfSunk(this.hits);
+      this.coordinates = [];
     }
     hit(index) {
       this.hits[index] = 1;
