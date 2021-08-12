@@ -262,16 +262,26 @@ const setupboard = (function () {
           transformedCoordinates[0]
         );
         if (isItThisShip) {
+          console.log(shipFleet[i].name);
+          console.log(shipFleet[i].hits);
+          console.log(arrayOfCoordinates);
+          //o hit index nao esta bem. estou a comparar coisas diferentes. arrayofcoordinates. nem sei como é que com isto sem  sei o barco esta neste sitio. ver o que é transformed coordinates tb
           const hitIndex = arrayOfCoordinates.findIndex(
             (element) => element === transformedCoordinates[0]
           );
-          shipFleet[i].hits[hitIndex] = "x";
+          console.log(hitIndex);
+          // shipFleet[i].hits[hitIndex] = "x";
+          shipFleet[i].hit(hitIndex);
           boardobj.coordinates[coordinates] = "x";
+          shipFleet[i].hits;
           if (shipFleet[i].sunk) {
+            console.log("ship sunk: " + shipFleet[i].name);
             sunkShips.push(shipFleet[i]);
-          }
-          if (sunkShips.length === 5) {
-            return "gameover";
+            console.log(sunkShips.length);
+            if (sunkShips.length === 5) {
+              console.log("gameover");
+              return "gameover";
+            }
           }
           return "hit";
         }
@@ -334,10 +344,26 @@ function gameLoopPrompt() {
   console.log("player A checks B's board");
   displayboard(playerATracksBBoard);
   const locationFromPrompt = prompt("Pick a location ");
-  const location = [
-    Number(locationFromPrompt[0]),
-    Number(locationFromPrompt[1]),
-  ];
+  let location;
+  if (locationFromPrompt.includes("d")) {
+    const dlocation = locationFromPrompt.indexOf("d");
+    if (dlocation === 0) {
+      if (locationFromPrompt[1] === "d") {
+        location = [10, 10];
+      } else {
+        location = [10, Number(locationFromPrompt[1])];
+      }
+    } else {
+      location = [Number(locationFromPrompt[0]), 10];
+    }
+  } else {
+    location = [Number(locationFromPrompt[0]), Number(locationFromPrompt[1])];
+  }
+
+  // const location = [
+  //   Number(locationFromPrompt[0]),
+  //   Number(locationFromPrompt[1]),
+  // ];
   console.log(location);
   // player A attacks
   const hitormissAvsB = setupboard.receiveAttack(playerBBoard, location);
@@ -375,14 +401,18 @@ function gameLoopPrompt() {
   }
   displayboard(playerBTracksABoard);
   displayboard(playerABoard);
+
+  while (hitormissAvsB !== "gameover" || hitormissBvsA !== "gameover") {
+    gameLoopPrompt();
+  }
 }
 
-let count = 0;
-while (count < 15) {
-  gameLoopPrompt();
-  count++;
-}
-//gameLoopPrompt();
+// let count = 0;
+// while (count < 15) {
+//   gameLoopPrompt();
+//   count++;
+// }
+gameLoopPrompt();
 
 // //console.log("playerA attacks playerB");
 // setupboard.receiveAttack(playerBBoard, [4, 5]);
