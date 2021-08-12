@@ -22,7 +22,7 @@ const createGameboard = function (player) {
   return gameboard;
 };
 
-const newBoard = createGameboard("playerA");
+//const newBoard = createGameboard("playerA");
 
 const getRandomIntInclusive = function (min, max) {
   min = Math.ceil(min);
@@ -45,69 +45,10 @@ const pickLocation = function (obj) {
   return pickRandomLocation;
 };
 
-const placeShip = (function () {
+const placeShips = (function () {
   let randomLocation;
   let row;
   let column;
-
-  // const whereToCheckRow = function (currentboard, currentship) {
-  //   let array = [];
-  //   for (let i = 1; i < currentship.length; i++) {
-  //     const shiftedColumn = column - i;
-  //     if (shiftedColumn < 1) {
-  //       continue;
-  //     }
-  //     const location = row + "," + shiftedColumn;
-  //     const statusOnLocation = currentboard.coordinates[location];
-  //     //console.log(location, statusOnLocation);
-  //     if (statusOnLocation === 0) {
-  //       array.push(shiftedColumn);
-  //     }
-  //   }
-  //   for (let j = 1; j < currentship.length; j++) {
-  //     const shiftedColumn = column + j;
-  //     if (shiftedColumn > 10) {
-  //       continue;
-  //     }
-  //     const location = row + "," + shiftedColumn;
-  //     const statusOnLocation = currentboard.coordinates[location];
-  //     //console.log(location, statusOnLocation);
-  //     if (statusOnLocation === 0) {
-  //       array.push(shiftedColumn);
-  //     }
-  //   }
-  //   //console.log("array where to check row");
-  //   //console.log(array);
-  //   return array;
-  // };
-  // const whereToCheckColumn = function (currentboard, currentship) {
-  //   let array = [];
-  //   for (let i = 1; i < currentship.length; i++) {
-  //     const shiftedRow = row - i;
-  //     if (shiftedRow < 1) {
-  //       continue;
-  //     }
-  //     const location = shiftedRow + "," + column;
-  //     const statusOnLocation = currentboard.coordinates[location];
-  //     if (statusOnLocation === 0) {
-  //       array.push(shiftedRow);
-  //     }
-  //   }
-  //   for (let j = 1; j < currentship.length; j++) {
-  //     const shiftedRow = row + j;
-  //     if (shiftedRow > 10) {
-  //       continue;
-  //     }
-  //     const location = shiftedRow + "," + column;
-  //     const statusOnLocation = currentboard.coordinates[location];
-  //     if (statusOnLocation === 0) {
-  //       array.push(shiftedRow);
-  //     }
-  //   }
-  //   //console.log("array where to check column");
-  //   //console.log(array);
-  //   return array;
-  // };
 
   const locationsArray = function (currentboard, currentship, orientation) {
     let array = [];
@@ -180,7 +121,6 @@ const placeShip = (function () {
         return beginningOfShip;
       } else {
         goodspot = false;
-        //console.log("fails");
         continue;
       }
     }
@@ -203,14 +143,6 @@ const placeShip = (function () {
     )
       .concat(row)
       .sort(compareNumbers);
-
-    // const availableSpacesRow = whereToCheckRow(currentboard, currentship)
-    //       .concat(column)
-    //       .sort(compareNumbers);
-    // const availableSpacesColumn = whereToCheckColumn(currentboard, currentship)
-    //       .concat(row)
-    //       .sort(compareNumbers);
-    // pick randomly row or column (not really random: if row is odd check column if even check row)
 
     if (row % 2 === 1) {
       if (availableSpacesRow.length < currentship.length) {
@@ -266,14 +198,10 @@ const placeShip = (function () {
     randomLocation = pickLocation(boardobj.coordinates).split(",");
     row = Number(randomLocation[0]);
     column = Number(randomLocation[1]);
-    //displayboard(boardobj);
-    //console.log("random location: " + row, column);
     const selectInitialPlacement = checkForFit(currentship, boardobj);
     if (selectInitialPlacement === "fails check") {
-      //console.log("recursive");
       return changeBoard(boardobj, currentship);
     }
-    //console.log(selectInitialPlacement);
     if (!selectInitialPlacement) {
       return "ERROR ERROR";
     }
@@ -309,17 +237,57 @@ const placeShip = (function () {
   return { changeBoard };
 })();
 
-function setupboard() {
-  let newBoard2 = createGameboard("playerA");
-  placeShip.changeBoard(newBoard2, shipFleet[0]);
-  placeShip.changeBoard(newBoard2, shipFleet[1]);
-  placeShip.changeBoard(newBoard2, shipFleet[2]);
-  placeShip.changeBoard(newBoard2, shipFleet[3]);
-  placeShip.changeBoard(newBoard2, shipFleet[4]);
-  displayboard(newBoard2);
-}
+const setupboard = (function () {
+  const createBoard = function (player) {
+    let newBoard = createGameboard(player);
+    placeShips.changeBoard(newBoard, shipFleet[0]);
+    placeShips.changeBoard(newBoard, shipFleet[1]);
+    placeShips.changeBoard(newBoard, shipFleet[2]);
+    placeShips.changeBoard(newBoard, shipFleet[3]);
+    placeShips.changeBoard(newBoard, shipFleet[4]);
+    displayboard(newBoard);
+    return newBoard;
+  };
+  let sunkShips = [];
+  const receiveAttack = function (boardobj, coordinates) {
+    const boardStatusOnCoordinates = boardobj.coordinates[coordinates];
+    //tenho de decidir como é que recebo estas coordenadas. por enqunato estar [ 2, 3]
+    const transformedCoordinates = [coordinates[0] + "," + coordinates[1]];
+    //assume that people don't pick places that were hit before for now
+    if (boardStatusOnCoordinates === 1) {
+      console.log("hit");
+      for (let i = 0; i < shipFleet.length; i++) {
+        const arrayOfCoordinates = shipFleet[i].coordinates.flat();
+        const isItThisShip = arrayOfCoordinates.includes(
+          transformedCoordinates[0]
+        );
+        if (isItThisShip) {
+          const hitIndex = arrayOfCoordinates.findIndex(
+            (element) => element === transformedCoordinates[0]
+          );
+          shipFleet[i].hits[hitIndex] = "x";
+          boardobj.coordinates[coordinates] = "x";
+          if (shipFleet[i].sunk) {
+            sunkShips.push(shipFleet[i]);
+          }
+          if (sunkShips.length === 5) {
+            return "gameover";
+          }
+          return "hit";
+        }
+      }
+    } else {
+      console.log("miss");
+      boardobj.coordinates[coordinates] = "m";
+      return "miss";
+    }
+  };
+  return { createBoard, receiveAttack };
+})();
 
 const displayboard = function (currentboard) {
+  //console.log(currentboard.player);
+  console.log(" ");
   const coord = currentboard.coordinates;
   console.log(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, "d");
   for (let i = 1; i <= 10; i++) {
@@ -355,11 +323,72 @@ const displayboard = function (currentboard) {
   }
 };
 
-setupboard();
+const playerABoard = setupboard.createBoard("playerA");
+const playerATracksBBoard = createGameboard("playerATracksB");
+const playerBBoard = setupboard.createBoard("playerB");
+const playerBTracksABoard = createGameboard("playerBTracksA");
 
-// console.log("primeiro");
-// console.log("segundo");
-// placeShip.changeBoard(newBoard2, shipFleet[1]);
-// console.log(newBoard2.coordinates);
-// if it fails, it should pick a new randomlocation
-// quando se coloca um barco devia guardar a posicao desse barco no objecto do barco
+function gameLoopPrompt() {
+  //player A picks a coordinate
+  const prompt = require("prompt-sync")();
+  console.log("player A checks B's board");
+  displayboard(playerATracksBBoard);
+  const locationFromPrompt = prompt("Pick a location ");
+  const location = [
+    Number(locationFromPrompt[0]),
+    Number(locationFromPrompt[1]),
+  ];
+  console.log(location);
+  // player A attacks
+  const hitormissAvsB = setupboard.receiveAttack(playerBBoard, location);
+  if (hitormissAvsB === "hit") {
+    playerATracksBBoard.coordinates[location] = "x";
+  } else {
+    playerATracksBBoard.coordinates[location] = "m";
+  }
+
+  displayboard(playerATracksBBoard);
+  displayboard(playerBBoard);
+
+  //player B picks a coordinate
+  console.log("player B checks A's board");
+  displayboard(playerBTracksABoard);
+
+  const selectedLocationRaw = pickLocation(
+    playerBTracksABoard.coordinates
+  ).split(",");
+  const selectedLocation = [
+    Number(selectedLocationRaw[0]),
+    Number(selectedLocationRaw[1]),
+  ];
+  console.log(selectedLocation);
+  //player B attacks
+
+  const hitormissBvsA = setupboard.receiveAttack(
+    playerABoard,
+    selectedLocation
+  );
+  if (hitormissBvsA === "hit") {
+    playerBTracksABoard.coordinates[selectedLocation] = "x";
+  } else {
+    playerBTracksABoard.coordinates[selectedLocation] = "m";
+  }
+  displayboard(playerBTracksABoard);
+  displayboard(playerABoard);
+}
+
+let count = 0;
+while (count < 15) {
+  gameLoopPrompt();
+  count++;
+}
+//gameLoopPrompt();
+
+// //console.log("playerA attacks playerB");
+// setupboard.receiveAttack(playerBBoard, [4, 5]);
+// setupboard.receiveAttack(playerATracksBBoard, [4, 5]);
+
+// console.log("playerB attacks player A");
+// gameLoop();
+// displayboard(playerABoard);
+// displayboard(playerBTracksABoard);

@@ -9,7 +9,7 @@ const createArrayHits = function (length) {
 };
 
 const checkIfSunk = function (hitsarray) {
-  if (hitsarray.find((element) => element === "x") === undefined) {
+  if (hitsarray.find((element) => element === "0") === undefined) {
     return true;
   } else {
     return false;
