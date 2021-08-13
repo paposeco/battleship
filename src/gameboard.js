@@ -1,6 +1,9 @@
-//import { createShip } from "ships.js";
-const createShipFleet = require("./ships.js");
-//const shipFleet = createShipFleet();
+import { createShipFleet } from "./ships.js";
+import { createPlayer } from "./player.js";
+export { startGame, setupPlayers };
+
+//const createShipFleet = require("./ships.js");
+//const createPlayer = require("./player.js");
 
 const createGameboard = function (player) {
   const boardObject = function () {
@@ -21,8 +24,6 @@ const createGameboard = function (player) {
   const gameboard = new Gameboard(player);
   return gameboard;
 };
-
-//const newBoard = createGameboard("playerA");
 
 const getRandomIntInclusive = function (min, max) {
   min = Math.ceil(min);
@@ -51,6 +52,8 @@ const placeShips = (function () {
   let column;
 
   const locationsArray = function (currentboard, currentship, orientation) {
+    let newposition;
+    let fixedposition;
     let array = [];
     if (orientation === "row") {
       newposition = column;
@@ -228,7 +231,6 @@ const placeShips = (function () {
         coordinatesToChange.push(newcoord);
       }
     }
-    console.log(coordinatesToChange);
     for (let k = 0; k < coordinatesToChange.length; k++) {
       boardobj.coordinates[coordinatesToChange[k]] = 1;
       currentship.coordinates.push(coordinatesToChange[k]);
@@ -238,70 +240,77 @@ const placeShips = (function () {
   return { changeBoard };
 })();
 
-const setupboard = (function () {
-  let shipFleet;
-  const createBoard = function (player) {
-    let newBoard = createGameboard(player);
-    shipFleet = createShipFleet(player);
-    placeShips.changeBoard(newBoard, shipFleet[0]);
-    placeShips.changeBoard(newBoard, shipFleet[1]);
-    // placeShips.changeBoard(newBoard, shipFleet[2]);
-    // placeShips.changeBoard(newBoard, shipFleet[3]);
-    // placeShips.changeBoard(newBoard, shipFleet[4]);
-    displayboard(newBoard);
-    return newBoard;
-  };
-  let sunkShips = [];
-  const receiveAttack = function (boardobj, coordinates) {
-    const boardStatusOnCoordinates = boardobj.coordinates[coordinates];
-    //tenho de decidir como é que recebo estas coordenadas. por enqunato estar [ 2, 3]
-    const transformedCoordinates = [coordinates[0] + "," + coordinates[1]];
-    //assume that people don't pick places that were hit before for now
-    if (boardStatusOnCoordinates === 1) {
-      console.log("hit");
-      for (let i = 0; i < shipFleet.length; i++) {
-        const arrayOfCoordinates = shipFleet[i].coordinates.flat();
-        const isItThisShip = arrayOfCoordinates.includes(
-          transformedCoordinates[0]
-        );
-        if (isItThisShip) {
-          console.log(shipFleet[i].name);
-          console.log(shipFleet[i].hits);
-          console.log(shipFleet[i].coordinates);
-          console.log(arrayOfCoordinates);
+const setupBoard = function (player, playerobj) {
+  let newBoard = createGameboard(player);
+  const shipFleet = createShipFleet(player);
+  playerobj.ships = shipFleet;
+  placeShips.changeBoard(newBoard, shipFleet[0]);
+  placeShips.changeBoard(newBoard, shipFleet[1]);
+  placeShips.changeBoard(newBoard, shipFleet[2]);
+  placeShips.changeBoard(newBoard, shipFleet[3]);
+  placeShips.changeBoard(newBoard, shipFleet[4]);
+  displayboard(newBoard);
+  return newBoard;
+};
 
-          //o hit index nao esta bem. estou a comparar coisas diferentes. arrayofcoordinates. nem sei como é que com isto sem  sei o barco esta neste sitio. ver o que é transformed coordinates tb
-          const hitIndex = arrayOfCoordinates.findIndex(
-            (element) => element === transformedCoordinates[0]
-          );
-          console.log(hitIndex);
-          // shipFleet[i].hits[hitIndex] = "x";
-          shipFleet[i].hit(hitIndex);
-          boardobj.coordinates[coordinates] = "x";
-          shipFleet[i].hits;
-          if (shipFleet[i].sunk) {
-            console.log("ship sunk: " + shipFleet[i].name);
-            sunkShips.push(shipFleet[i]);
-            console.log(sunkShips.length);
-            if (sunkShips.length === 2) {
-              console.log("gameover");
-              return "gameover";
-            }
+const setupPlayers = function (player, ships, gameboard, advgameboard) {
+  const newplayer = createPlayer(player, ships, gameboard, advgameboard);
+  return newplayer;
+};
+
+const attack = function (attacker, victim, coordinates) {
+  const victimsBoard = victim.gameboard;
+  const attackerAdvBoard = attacker.advgameboard;
+  const victimsFleet = victim.ships;
+  const boardStatusOnCoordinates = victimsBoard.coordinates[coordinates];
+  const transformedCoordinates = [coordinates[0] + "," + coordinates[1]];
+  if (boardStatusOnCoordinates === 1) {
+    console.log("hit");
+    for (let i = 0; i < victimsFleet.length; i++) {
+      const arrayOfCoordinates = victimsFleet[i].coordinates.flat();
+      const isItThisShip = arrayOfCoordinates.includes(
+        transformedCoordinates[0]
+      );
+      if (isItThisShip) {
+        const hitIndex = arrayOfCoordinates.findIndex(
+          (element) => element === transformedCoordinates[0]
+        );
+        victimsFleet[i].hit(hitIndex);
+        victimsBoard.coordinates[coordinates] = "x";
+        attackerAdvBoard.coordinates[coordinates] = "x";
+        victimsFleet[i].hits;
+        if (victimsFleet[i].sunk) {
+          console.log("ship sunk: " + victimsFleet[i].name);
+          const sunkenShips = countSunkenShips(victimsFleet);
+          if (sunkenShips === 5) {
+            console.log("gameover");
+            return "gameover";
           }
-          return "hit";
         }
+        return "hit";
       }
-    } else {
-      console.log("miss");
-      boardobj.coordinates[coordinates] = "m";
-      return "miss";
     }
-  };
-  return { createBoard, receiveAttack };
-})();
+  } else {
+    console.log("miss");
+    victimsBoard.coordinates[coordinates] = "m";
+    attackerAdvBoard.coordinates[coordinates] = "m";
+    return "miss";
+  }
+};
+
+const countSunkenShips = function (array) {
+  let count = 0;
+  for (let i = 0; i < array.length; i++) {
+    const ship = array[i];
+    const sunk = ship.sunk;
+    if (sunk) {
+      count++;
+    }
+  }
+  return count;
+};
 
 const displayboard = function (currentboard) {
-  //console.log(currentboard.player);
   console.log(" ");
   const coord = currentboard.coordinates;
   console.log(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, "d");
@@ -338,83 +347,92 @@ const displayboard = function (currentboard) {
   }
 };
 
-const playerABoard = setupboard.createBoard("playerA");
-const playerATracksBBoard = createGameboard("playerATracksB");
-const playerBBoard = setupboard.createBoard("playerB");
-const playerBTracksABoard = createGameboard("playerBTracksA");
+// function gameLoopPrompt() {
+//   let stop = false;
+//   //player A picks a coordinate
+//   const prompt = require("prompt-sync")();
+//   console.log("player A checks B's board");
+//   displayboard(playerA.advgameboard);
+//   const locationFromPrompt = prompt("Pick a location ");
+//   let location;
+//   if (locationFromPrompt.includes("d")) {
+//     const dlocation = locationFromPrompt.indexOf("d");
+//     if (dlocation === 0) {
+//       if (locationFromPrompt[1] === "d") {
+//         location = [10, 10];
+//       } else {
+//         location = [10, Number(locationFromPrompt[1])];
+//       }
+//     } else {
+//       location = [Number(locationFromPrompt[0]), 10];
+//     }
+//   } else {
+//     location = [Number(locationFromPrompt[0]), Number(locationFromPrompt[1])];
+//   }
+//   console.log("Location selected: " + location);
+//   // player A attacks
+//   const hitormissAvsB = attack(playerA, playerB, location);
 
-function gameLoopPrompt() {
-  let stop = false;
-  //player A picks a coordinate
-  const prompt = require("prompt-sync")();
-  console.log("player A checks B's board");
-  displayboard(playerATracksBBoard);
-  const locationFromPrompt = prompt("Pick a location ");
-  let location;
-  if (locationFromPrompt.includes("d")) {
-    const dlocation = locationFromPrompt.indexOf("d");
-    if (dlocation === 0) {
-      if (locationFromPrompt[1] === "d") {
-        location = [10, 10];
-      } else {
-        location = [10, Number(locationFromPrompt[1])];
-      }
-    } else {
-      location = [Number(locationFromPrompt[0]), 10];
-    }
-  } else {
-    location = [Number(locationFromPrompt[0]), Number(locationFromPrompt[1])];
-  }
+//   if (hitormissAvsB === "gameover") {
+//     stop = true;
+//     return stop;
+//   }
+//   console.log("after A attacks, status on B's board from A's POV");
+//   displayboard(playerA.advgameboard);
 
-  console.log(location);
-  // player A attacks
-  const hitormissAvsB = setupboard.receiveAttack(playerBBoard, location);
-  if (hitormissAvsB === "hit") {
-    playerATracksBBoard.coordinates[location] = "x";
-  } else if (hitormissAvsB === "gameover") {
-    playerATracksBBoard.coordinates[location] = "x";
-    stop = true;
-    return stop;
-  } else {
-    playerATracksBBoard.coordinates[location] = "m";
-  }
+//   //player B picks a coordinate
+//   console.log("player B checks A's board");
+//   displayboard(playerB.advgameboard);
 
-  displayboard(playerATracksBBoard);
-  displayboard(playerBBoard);
+//   const selectedLocationRaw = pickLocation(
+//     playerB.advgameboard.coordinates
+//   ).split(",");
+//   const selectedLocation = [
+//     Number(selectedLocationRaw[0]),
+//     Number(selectedLocationRaw[1]),
+//   ];
+//   console.log("Location selected: " + selectedLocation);
+//   //player B attacks
 
-  //player B picks a coordinate
-  console.log("player B checks A's board");
-  displayboard(playerBTracksABoard);
+//   const hitormissBvsA = attack(playerB, playerA, selectedLocation);
+//   if (hitormissBvsA === "gameover") {
+//     stop = true;
+//     return stop;
+//   }
+//   console.log("after B attacks, status on A's board from B's POV");
+//   displayboard(playerB.advgameboard);
+//   return stop;
+// }
 
-  const selectedLocationRaw = pickLocation(
-    playerBTracksABoard.coordinates
-  ).split(",");
-  const selectedLocation = [
-    Number(selectedLocationRaw[0]),
-    Number(selectedLocationRaw[1]),
-  ];
-  console.log(selectedLocation);
-  //player B attacks
+// const playerA = setupPlayers("playerA", [], {}, {});
+// const playerB = setupPlayers("playerB", [], {}, {});
 
-  const hitormissBvsA = setupboard.receiveAttack(
-    playerABoard,
-    selectedLocation
-  );
-  if (hitormissBvsA === "hit") {
-    playerBTracksABoard.coordinates[selectedLocation] = "x";
-  } else if (hitormissBvsA === "gameover") {
-    playerBTracksABoard.coordinates[selectedLocation] = "x";
-    stop = true;
-    return stop;
-  } else {
-    playerBTracksABoard.coordinates[selectedLocation] = "m";
-  }
-  displayboard(playerBTracksABoard);
-  displayboard(playerABoard);
-  return stop;
+// const startGame = function () {
+//   const playerABoard = setupBoard("playerA", playerA);
+//   const playerATracksBBoard = createGameboard("playerATracksB");
+//   playerA.gameboard = playerABoard;
+//   playerA.advgameboard = playerATracksBBoard;
+//   const playerBBoard = setupBoard("playerB", playerB);
+//   const playerBTracksABoard = createGameboard("playerBTracksA");
+//   playerB.gameboard = playerBBoard;
+//   playerB.advgameboard = playerBTracksABoard;
+// };
+
+function startGame(player1, player2) {
+  const playerABoard = setupBoard("playerA", player1);
+  const playerATracksBBoard = createGameboard("playerATracksB");
+  player1.gameboard = playerABoard;
+  player1.advgameboard = playerATracksBBoard;
+  const playerBBoard = setupBoard("playerB", player2);
+  const playerBTracksABoard = createGameboard("playerBTracksA");
+  player2.gameboard = playerBBoard;
+  player2.advgameboard = playerBTracksABoard;
+  return [player1, player2];
 }
 
-let loopit = gameLoopPrompt();
-while (!loopit) {
-  loopit = gameLoopPrompt();
-}
+//startGame();
+
+// let loopit = gameLoopPrompt();
+// while (!loopit) {
+//   loopit = gameLoopPrompt();
+// }

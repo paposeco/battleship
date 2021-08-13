@@ -1,4 +1,4 @@
-//export { createShip };
+export { createShipFleet };
 
 const createArrayHits = function (length) {
   let array = [];
@@ -36,7 +36,7 @@ const createShip = function (length, name, player) {
   return shipcreated;
 };
 
-const shipFleet = function (player) {
+const createShipFleet = function (player) {
   const carrier = createShip(5, "carrier", player);
   const battleship = createShip(4, "battleship", player);
   const destroyer = createShip(3, "destroyer", player);
@@ -47,6 +47,6 @@ const shipFleet = function (player) {
 };
 
 // for node
-module.exports = shipFleet;
+//module.exports = shipFleet;
 
 // ships should probably have a unique id
