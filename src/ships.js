@@ -9,7 +9,7 @@ const createArrayHits = function (length) {
 };
 
 const checkIfSunk = function (hitsarray) {
-  console.log(hitsarray);
+  //console.log(hitsarray);
   if (hitsarray.find((element) => element === 0) === undefined) {
     return true;
   } else {
@@ -17,11 +17,12 @@ const checkIfSunk = function (hitsarray) {
   }
 };
 
-const createShip = function (length, name) {
+const createShip = function (length, name, player) {
   class Ship {
-    constructor(length, name) {
+    constructor(length, name, player) {
       this.length = length;
-      this.name = name;
+      this.player = player;
+      this.name = name + " " + player;
       this.hits = createArrayHits(this.length);
       this.sunk = checkIfSunk(this.hits);
       this.coordinates = [];
@@ -31,16 +32,16 @@ const createShip = function (length, name) {
       this.sunk = checkIfSunk(this.hits);
     }
   }
-  const shipcreated = new Ship(length, name);
+  const shipcreated = new Ship(length, name, player);
   return shipcreated;
 };
 
-const shipFleet = function () {
-  const carrier = createShip(5, "carrier");
-  const battleship = createShip(4, "battleship");
-  const destroyer = createShip(3, "destroyer");
-  const submarine = createShip(3, "submarine");
-  const patrolboat = createShip(2, "patrolboat");
+const shipFleet = function (player) {
+  const carrier = createShip(5, "carrier", player);
+  const battleship = createShip(4, "battleship", player);
+  const destroyer = createShip(3, "destroyer", player);
+  const submarine = createShip(3, "submarine", player);
+  const patrolboat = createShip(2, "patrolboat", player);
   const shiparray = [carrier, battleship, destroyer, submarine, patrolboat];
   return shiparray;
 };

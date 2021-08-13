@@ -1,6 +1,6 @@
 //import { createShip } from "ships.js";
 const createShipFleet = require("./ships.js");
-const shipFleet = createShipFleet();
+//const shipFleet = createShipFleet();
 
 const createGameboard = function (player) {
   const boardObject = function () {
@@ -228,6 +228,7 @@ const placeShips = (function () {
         coordinatesToChange.push(newcoord);
       }
     }
+    console.log(coordinatesToChange);
     for (let k = 0; k < coordinatesToChange.length; k++) {
       boardobj.coordinates[coordinatesToChange[k]] = 1;
       currentship.coordinates.push(coordinatesToChange[k]);
@@ -238,13 +239,15 @@ const placeShips = (function () {
 })();
 
 const setupboard = (function () {
+  let shipFleet;
   const createBoard = function (player) {
     let newBoard = createGameboard(player);
+    shipFleet = createShipFleet(player);
     placeShips.changeBoard(newBoard, shipFleet[0]);
     placeShips.changeBoard(newBoard, shipFleet[1]);
-    placeShips.changeBoard(newBoard, shipFleet[2]);
-    placeShips.changeBoard(newBoard, shipFleet[3]);
-    placeShips.changeBoard(newBoard, shipFleet[4]);
+    // placeShips.changeBoard(newBoard, shipFleet[2]);
+    // placeShips.changeBoard(newBoard, shipFleet[3]);
+    // placeShips.changeBoard(newBoard, shipFleet[4]);
     displayboard(newBoard);
     return newBoard;
   };
@@ -264,7 +267,9 @@ const setupboard = (function () {
         if (isItThisShip) {
           console.log(shipFleet[i].name);
           console.log(shipFleet[i].hits);
+          console.log(shipFleet[i].coordinates);
           console.log(arrayOfCoordinates);
+
           //o hit index nao esta bem. estou a comparar coisas diferentes. arrayofcoordinates. nem sei como é que com isto sem  sei o barco esta neste sitio. ver o que é transformed coordinates tb
           const hitIndex = arrayOfCoordinates.findIndex(
             (element) => element === transformedCoordinates[0]
@@ -278,7 +283,7 @@ const setupboard = (function () {
             console.log("ship sunk: " + shipFleet[i].name);
             sunkShips.push(shipFleet[i]);
             console.log(sunkShips.length);
-            if (sunkShips.length === 5) {
+            if (sunkShips.length === 2) {
               console.log("gameover");
               return "gameover";
             }
@@ -339,6 +344,7 @@ const playerBBoard = setupboard.createBoard("playerB");
 const playerBTracksABoard = createGameboard("playerBTracksA");
 
 function gameLoopPrompt() {
+  let stop = false;
   //player A picks a coordinate
   const prompt = require("prompt-sync")();
   console.log("player A checks B's board");
@@ -360,15 +366,15 @@ function gameLoopPrompt() {
     location = [Number(locationFromPrompt[0]), Number(locationFromPrompt[1])];
   }
 
-  // const location = [
-  //   Number(locationFromPrompt[0]),
-  //   Number(locationFromPrompt[1]),
-  // ];
   console.log(location);
   // player A attacks
   const hitormissAvsB = setupboard.receiveAttack(playerBBoard, location);
   if (hitormissAvsB === "hit") {
     playerATracksBBoard.coordinates[location] = "x";
+  } else if (hitormissAvsB === "gameover") {
+    playerATracksBBoard.coordinates[location] = "x";
+    stop = true;
+    return stop;
   } else {
     playerATracksBBoard.coordinates[location] = "m";
   }
@@ -396,29 +402,19 @@ function gameLoopPrompt() {
   );
   if (hitormissBvsA === "hit") {
     playerBTracksABoard.coordinates[selectedLocation] = "x";
+  } else if (hitormissBvsA === "gameover") {
+    playerBTracksABoard.coordinates[selectedLocation] = "x";
+    stop = true;
+    return stop;
   } else {
     playerBTracksABoard.coordinates[selectedLocation] = "m";
   }
   displayboard(playerBTracksABoard);
   displayboard(playerABoard);
-
-  while (hitormissAvsB !== "gameover" || hitormissBvsA !== "gameover") {
-    gameLoopPrompt();
-  }
+  return stop;
 }
 
-// let count = 0;
-// while (count < 15) {
-//   gameLoopPrompt();
-//   count++;
-// }
-gameLoopPrompt();
-
-// //console.log("playerA attacks playerB");
-// setupboard.receiveAttack(playerBBoard, [4, 5]);
-// setupboard.receiveAttack(playerATracksBBoard, [4, 5]);
-
-// console.log("playerB attacks player A");
-// gameLoop();
-// displayboard(playerABoard);
-// displayboard(playerBTracksABoard);
+let loopit = gameLoopPrompt();
+while (!loopit) {
+  loopit = gameLoopPrompt();
+}
