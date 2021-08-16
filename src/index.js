@@ -26,35 +26,64 @@ for (let i = 1; i <= 10; i++) {
 // place ships
 
 const selectShipLocation = (function () {
-  const shipsToBePlaced = playerA.ships;
-  const currentshiptitle = document.getElementById("currentShip");
-
-  // se calhar tenho fazer um return dentro da funcao e correr ate um array ter o length que quero. posso seleccionar o currentship lendo o array
-  function placeships(currentship) {
+  let placed = 0;
+  let coordinateArray;
+  function placeShip(currentship) {
     let coordinates = [];
+    const currentshiptitle = document.getElementById("currentShip");
+    let coordinatesLength;
     const shipLength = currentship.length;
     const shipName = currentship.name;
     currentshiptitle.textContent = `Select ${shipLength} consecutive squares for placing your ${shipName}.`;
     const alldivs = document.querySelectorAll(".notSelectedA");
-    const selectSquare = function (e) {
+    function selectSquare(e) {
       const divid = e.target.id;
       coordinates.push(divid);
-      e.target.classList.add("selectedA");
+      coordinatesLength = coordinates.length;
+      e.target.classList.add("selectedA" + placed);
+      const finishedplacing = checkdivs(currentship);
+      if (finishedplacing) {
+        saveCoord(coordinates, currentship);
+      }
       if (coordinates.length === shipLength) {
-        console.log(coordinates);
         alldivs.forEach(function (element) {
           element.removeEventListener("click", selectSquare);
         });
+        while (placed < 5) {
+          placeAllShips();
+        }
       }
-    };
+    }
 
     alldivs.forEach(function (element) {
       element.addEventListener("click", selectSquare);
     });
   }
-  placeships(shipsToBePlaced[0]).then(placeships(shipsToBePlaced[1]));
-  //first ship
+
+  function placeAllShips() {
+    const shipsToBePlaced = playerA.ships;
+    placeShip(shipsToBePlaced[placed]);
+  }
+
+  function checkdivs(currentship) {
+    const divs = document.querySelectorAll(".selectedA" + placed);
+    if (divs.length === currentship.length) {
+      placed++;
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  const saveCoord = function (coord, currentship) {
+    const arraycoord = coord;
+    arraycoord.map((element) => element.replace("-", ","));
+    console.log(arraycoord);
+  };
+  return { placeAllShips };
 })();
+
+selectShipLocation.placeAllShips();
 
 // for (let i = 0; i < playerA.ships.length; i++) {
 //   const ship = playerA.ships[i];

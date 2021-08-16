@@ -1,0 +1,36 @@
+body {
+  width: max-content;
+  height: 600px;
+  margin: 200px auto;
+}
+
+#battlefield {
+  display: flex;
+  flex-direction: row;
+  gap: 50px;
+}
+.hitBox {
+  border: solid 1px grey;
+  width: 20px;
+  height: 20px;
+}
+
+#playerBoard {
+  display: grid;
+  grid-template-columns: repeat(10, 22px);
+  gap: 4px;
+}
+
+#advBoard {
+  display: grid;
+  grid-template-columns: repeat(10, 22px);
+  gap: 4px;
+}
+
+.selectedA0,
+.selectedA1,
+.selectedA2,
+.selectedA3,
+.selectedA4 {
+  background-color: darkgreen;
+}
