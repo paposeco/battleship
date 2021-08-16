@@ -1,8 +1,9 @@
 import "./style.css";
-import { startGame, setupPlayers, gameLoopPrompt } from "./gameboard.js";
+import { startGame, setupPlayers, attack, gameLoop } from "./gameboard.js";
 
 const playerBoard = document.getElementById("playerBoard");
 const advBoard = document.getElementById("advBoard");
+//i'm atributting coordinates do player's A ships, and changing them later according to user input
 let playerA = setupPlayers("playerA", [], {}, {});
 let playerB = setupPlayers("playerB", [], {}, {});
 const updatedPlayers = startGame(playerA, playerB);
@@ -25,6 +26,7 @@ for (let i = 1; i <= 10; i++) {
 
 // place ships
 
+let gamestatus;
 const selectShipLocation = (function () {
   let placed = 0;
   let coordinateArray;
@@ -41,20 +43,17 @@ const selectShipLocation = (function () {
       coordinates.push(divid);
       coordinatesLength = coordinates.length;
       e.target.classList.add("selectedA" + placed);
-      const finishedplacing = checkdivs(currentship);
-      if (finishedplacing) {
-        saveCoord(coordinates, currentship);
-      }
-      if (coordinates.length === shipLength) {
+      e.target.classList.remove("notSelectedA");
+      checkIfFinished(currentship, coordinates);
+      if (coordinatesLength === shipLength) {
         alldivs.forEach(function (element) {
           element.removeEventListener("click", selectSquare);
         });
-        while (placed < 5) {
+        if (placed < 5) {
           placeAllShips();
         }
       }
     }
-
     alldivs.forEach(function (element) {
       element.addEventListener("click", selectSquare);
     });
@@ -65,35 +64,68 @@ const selectShipLocation = (function () {
     placeShip(shipsToBePlaced[placed]);
   }
 
-  function checkdivs(currentship) {
+  function checkIfFinished(currentship, coord) {
     const divs = document.querySelectorAll(".selectedA" + placed);
     if (divs.length === currentship.length) {
+      const arraycoord = coord;
+      const newarraycoord = arraycoord.map((element) => [
+        element.replace("-", ","),
+      ]);
+      playerA.ships[placed].coordinates = newarraycoord;
+      for (let i = 0; i < newarraycoord.length; i++) {
+        playerA.gameboard.coordinates[newarraycoord[i].toString()] = 1;
+      }
       placed++;
-      return true;
-    } else {
-      return false;
+      if (placed === 5) {
+        continueplaying();
+      }
     }
   }
 
-  const saveCoord = function (coord, currentship) {
-    const arraycoord = coord;
-    arraycoord.map((element) => element.replace("-", ","));
-    console.log(arraycoord);
-  };
   return { placeAllShips };
 })();
 
 selectShipLocation.placeAllShips();
 
-// for (let i = 0; i < playerA.ships.length; i++) {
-//   const ship = playerA.ships[i];
-//   const shipname = ship.name;
-//   const shipcoordinates = ship.coordinates;
-//   const sunkStatus = ship.sunk;
-//   const array = [shipname, shipcoordinates, sunkStatus];
-//   for (let j = 0; j < 3; j++) {
-//     const para = document.createElement("p");
-//     para.textContent = array[j];
-//     playerBoard.appendChild(para);
-//   }
-// }
+const attackonclick = function (e) {
+  const div = e.target;
+  const divID = e.target.id;
+  div.classList.add("selectedB");
+  div.classList.remove("notSelectedB");
+  const divcoord = [divID.replace("-", ",")];
+  div.removeEventListener("click", attackonclick);
+  gamestatus = gameLoop(divcoord, playerA, playerB);
+  const advboard = document.getElementById("advBoard");
+  const allemptydivs = advboard.querySelectorAll(".notSelectedB");
+  allemptydivs.forEach((element) =>
+    element.removeEventListener("click", attackonclick)
+  );
+  checkForEndOfGame();
+  if (!gamestatus) {
+    continueplaying();
+  }
+};
+
+const continueplaying = function () {
+  const info = document.getElementById("currentShip");
+  info.textContent =
+    "Attack the enemy by clicking on an empty square on the enemy board.";
+  const advboard = document.getElementById("advBoard");
+  const allemptydivs = advboard.querySelectorAll(".notSelectedB");
+  allemptydivs.forEach((element) =>
+    element.addEventListener("click", attackonclick)
+  );
+};
+
+const checkForEndOfGame = function () {
+  console.log(gamestatus);
+  if (gamestatus) {
+    const info = document.getElementById("currentShip");
+    info.textContent = "GameOver";
+    const advboard = document.getElementById("advBoard");
+    const allemptydivs = advboard.querySelectorAll(".notSelectedB");
+    allemptydivs.forEach((element) =>
+      element.removeEventListener("click", attackonclick)
+    );
+  }
+};

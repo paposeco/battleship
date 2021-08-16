@@ -1,6 +1,6 @@
 import { createShipFleet } from "./ships.js";
 import { createPlayer } from "./player.js";
-export { startGame, setupPlayers };
+export { startGame, setupPlayers, attack, gameLoop };
 
 //const createShipFleet = require("./ships.js");
 //const createPlayer = require("./player.js");
@@ -244,11 +244,13 @@ const setupBoard = function (player, playerobj) {
   let newBoard = createGameboard(player);
   const shipFleet = createShipFleet(player);
   playerobj.ships = shipFleet;
-  placeShips.changeBoard(newBoard, shipFleet[0]);
-  placeShips.changeBoard(newBoard, shipFleet[1]);
-  placeShips.changeBoard(newBoard, shipFleet[2]);
-  placeShips.changeBoard(newBoard, shipFleet[3]);
-  placeShips.changeBoard(newBoard, shipFleet[4]);
+  if (player === "playerB") {
+    placeShips.changeBoard(newBoard, shipFleet[0]);
+    placeShips.changeBoard(newBoard, shipFleet[1]);
+    placeShips.changeBoard(newBoard, shipFleet[2]);
+    placeShips.changeBoard(newBoard, shipFleet[3]);
+    placeShips.changeBoard(newBoard, shipFleet[4]);
+  }
   displayboard(newBoard);
   return newBoard;
 };
@@ -271,6 +273,12 @@ const attack = function (attacker, victim, coordinates) {
       const isItThisShip = arrayOfCoordinates.includes(
         transformedCoordinates[0]
       );
+      console.log(victimsFleet[i]);
+      console.log("coordinates");
+      console.log(coordinates);
+      console.log("transformed");
+      console.log(transformedCoordinates);
+      console.log("isit" + isItThisShip);
       if (isItThisShip) {
         const hitIndex = arrayOfCoordinates.findIndex(
           (element) => element === transformedCoordinates[0]
@@ -347,76 +355,57 @@ const displayboard = function (currentboard) {
   }
 };
 
-// function gameLoopPrompt() {
-//   let stop = false;
-//   //player A picks a coordinate
-//   const prompt = require("prompt-sync")();
-//   console.log("player A checks B's board");
-//   displayboard(playerA.advgameboard);
-//   const locationFromPrompt = prompt("Pick a location ");
-//   let location;
-//   if (locationFromPrompt.includes("d")) {
-//     const dlocation = locationFromPrompt.indexOf("d");
-//     if (dlocation === 0) {
-//       if (locationFromPrompt[1] === "d") {
-//         location = [10, 10];
-//       } else {
-//         location = [10, Number(locationFromPrompt[1])];
-//       }
-//     } else {
-//       location = [Number(locationFromPrompt[0]), 10];
-//     }
-//   } else {
-//     location = [Number(locationFromPrompt[0]), Number(locationFromPrompt[1])];
-//   }
-//   console.log("Location selected: " + location);
-//   // player A attacks
-//   const hitormissAvsB = attack(playerA, playerB, location);
+function gameLoop(location, playerA, playerB) {
+  let stop = false;
+  //player A picks a coordinate
 
-//   if (hitormissAvsB === "gameover") {
-//     stop = true;
-//     return stop;
-//   }
-//   console.log("after A attacks, status on B's board from A's POV");
-//   displayboard(playerA.advgameboard);
+  console.log("A Location selected: ");
+  console.log(location);
+  // player A attacks
+  const locationtemp = location.toString().split(",");
+  const finallocation = [Number(locationtemp[0]), Number(locationtemp[1])];
+  const hitormissAvsB = attack(playerA, playerB, finallocation);
+  console.log(hitormissAvsB);
 
-//   //player B picks a coordinate
-//   console.log("player B checks A's board");
-//   displayboard(playerB.advgameboard);
+  if (hitormissAvsB === "hit" || hitormissAvsB === "gameover") {
+    const transformcoordtoidLocation = location.toString().replace(",", "-");
+    const otherplayerboard = document.getElementById("otherplayer");
+    const findDivOther = otherplayerboard.querySelector(
+      `[id="${transformcoordtoidLocation}"]`
+    );
+    console.log(findDivOther);
+    findDivOther.classList.add("hit");
+  }
+  if (hitormissAvsB === "gameover") {
+    stop = true;
+    return stop;
+  }
 
-//   const selectedLocationRaw = pickLocation(
-//     playerB.advgameboard.coordinates
-//   ).split(",");
-//   const selectedLocation = [
-//     Number(selectedLocationRaw[0]),
-//     Number(selectedLocationRaw[1]),
-//   ];
-//   console.log("Location selected: " + selectedLocation);
-//   //player B attacks
-
-//   const hitormissBvsA = attack(playerB, playerA, selectedLocation);
-//   if (hitormissBvsA === "gameover") {
-//     stop = true;
-//     return stop;
-//   }
-//   console.log("after B attacks, status on A's board from B's POV");
-//   displayboard(playerB.advgameboard);
-//   return stop;
-// }
-
-// const playerA = setupPlayers("playerA", [], {}, {});
-// const playerB = setupPlayers("playerB", [], {}, {});
-
-// const startGame = function () {
-//   const playerABoard = setupBoard("playerA", playerA);
-//   const playerATracksBBoard = createGameboard("playerATracksB");
-//   playerA.gameboard = playerABoard;
-//   playerA.advgameboard = playerATracksBBoard;
-//   const playerBBoard = setupBoard("playerB", playerB);
-//   const playerBTracksABoard = createGameboard("playerBTracksA");
-//   playerB.gameboard = playerBBoard;
-//   playerB.advgameboard = playerBTracksABoard;
-// };
+  //player B picks a coordinate
+  const selectedLocationRaw = pickLocation(
+    playerB.advgameboard.coordinates
+  ).split(",");
+  const selectedLocation = [
+    Number(selectedLocationRaw[0]),
+    Number(selectedLocationRaw[1]),
+  ];
+  console.log("B Location selected: " + selectedLocation);
+  //player B attacks
+  console.log(selectedLocation);
+  const transformcoordtoid = selectedLocation.toString().replace(",", "-");
+  const mainplayerboard = document.getElementById("mainplayer");
+  const findDiv = mainplayerboard.querySelector(`[id="${transformcoordtoid}"]`);
+  findDiv.classList.add("selectedbyB");
+  const hitormissBvsA = attack(playerB, playerA, selectedLocation);
+  if (hitormissBvsA === "hit" || hitormissBvsA === "gameover") {
+    findDiv.classList.add("hit");
+  }
+  if (hitormissBvsA === "gameover") {
+    stop = true;
+    return stop;
+  }
+  return stop;
+}
 
 function startGame(player1, player2) {
   const playerABoard = setupBoard("playerA", player1);
