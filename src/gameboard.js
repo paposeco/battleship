@@ -1,5 +1,6 @@
 import { createShipFleet } from "./ships.js";
 import { createPlayer } from "./player.js";
+import { domPlayerB } from "./index.js";
 export { startGame, setupPlayers, attack, gameLoop };
 
 //const createShipFleet = require("./ships.js");
@@ -359,13 +360,13 @@ function gameLoop(location, playerA, playerB) {
   let stop = false;
   //player A picks a coordinate
 
-  console.log("A Location selected: ");
-  console.log(location);
+  //console.log("A Location selected: ");
+  //console.log(location);
   // player A attacks
   const locationtemp = location.toString().split(",");
   const finallocation = [Number(locationtemp[0]), Number(locationtemp[1])];
   const hitormissAvsB = attack(playerA, playerB, finallocation);
-  console.log(hitormissAvsB);
+  //console.log(hitormissAvsB);
 
   if (hitormissAvsB === "hit" || hitormissAvsB === "gameover") {
     const transformcoordtoidLocation = location.toString().replace(",", "-");
@@ -373,7 +374,7 @@ function gameLoop(location, playerA, playerB) {
     const findDivOther = otherplayerboard.querySelector(
       `[id="${transformcoordtoidLocation}"]`
     );
-    console.log(findDivOther);
+    //console.log(findDivOther);
     findDivOther.classList.add("hit");
   }
   if (hitormissAvsB === "gameover") {
@@ -381,7 +382,8 @@ function gameLoop(location, playerA, playerB) {
     return stop;
   }
 
-  //player B picks a coordinate
+  //  player B picks a coordinate
+
   const selectedLocationRaw = pickLocation(
     playerB.advgameboard.coordinates
   ).split(",");
@@ -389,17 +391,18 @@ function gameLoop(location, playerA, playerB) {
     Number(selectedLocationRaw[0]),
     Number(selectedLocationRaw[1]),
   ];
-  console.log("B Location selected: " + selectedLocation);
+  //console.log("B Location selected: " + selectedLocation);
   //player B attacks
-  console.log(selectedLocation);
+  //console.log(selectedLocation);
   const transformcoordtoid = selectedLocation.toString().replace(",", "-");
   const mainplayerboard = document.getElementById("mainplayer");
   const findDiv = mainplayerboard.querySelector(`[id="${transformcoordtoid}"]`);
-  findDiv.classList.add("selectedbyB");
   const hitormissBvsA = attack(playerB, playerA, selectedLocation);
-  if (hitormissBvsA === "hit" || hitormissBvsA === "gameover") {
-    findDiv.classList.add("hit");
-  }
+
+  setTimeout(function () {
+    domPlayerB(hitormissBvsA, findDiv);
+  }, 1500);
+
   if (hitormissBvsA === "gameover") {
     stop = true;
     return stop;

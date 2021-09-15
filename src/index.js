@@ -1,5 +1,6 @@
 import "./style.css";
 import { startGame, setupPlayers, attack, gameLoop } from "./gameboard.js";
+export { domPlayerB };
 
 const playerBoard = document.getElementById("playerBoard");
 const advBoard = document.getElementById("advBoard");
@@ -29,7 +30,6 @@ for (let i = 1; i <= 10; i++) {
 let gamestatus;
 const selectShipLocation = (function () {
   let placed = 0;
-  let coordinateArray;
   function placeShip(currentship) {
     let coordinates = [];
     const currentshiptitle = document.getElementById("currentShip");
@@ -76,32 +76,66 @@ const selectShipLocation = (function () {
   ) {
     let goodMove = false;
     if (coordinatesarray.length === 0) {
-      const selectedCoord = currentselection.split("-");
-      const selectedX = selectedCoord[0];
-      const selectedY = selectedCoord[1];
-      // a location so é valida se existerem espaços livres suficientes em cada direccao
-      return true;
+      // checks if it fits horizontally first and then vertically if necessary
+      if (
+        checkIfShipFitsHorizontally(
+          shiplength,
+          currentselection,
+          coordinatesarray
+        )
+      ) {
+        console.log("true");
+        return true;
+      } else if (
+        checkIfShipFitsVertically(
+          shiplength,
+          currentselection,
+          coordinatesarray
+        )
+      ) {
+        return true;
+      } else {
+        return false;
+      }
     }
     if (coordinatesarray.length === 1) {
       const coordinatesNumbers = coordinatesarray[0].split("-");
       const coordinatesX = Number(coordinatesNumbers[0]);
       const coordinatesY = Number(coordinatesNumbers[1]);
       const northCoord = coordinatesX - 1 + "-" + coordinatesY;
-
       const southCoord = coordinatesX + 1 + "-" + coordinatesY;
       const westCoord = coordinatesX + "-" + (coordinatesY - 1);
       const eastCoord = coordinatesX + "-" + (coordinatesY + 1);
 
       const legalMoves = [northCoord, southCoord, westCoord, eastCoord];
 
-      // check for consecutive available spaces so that the ship fits
-
-      for (let i = 0; i < legalMoves.length; i++) {
-        if (currentselection === legalMoves[i]) {
-          goodMove = true;
-          break;
+      if (legalMoves.includes(currentselection)) {
+        // with current selection, the ship would be placed how?
+        const currentSelectionSplit = currentselection.split("-");
+        const currentSelectionX = Number(currentSelectionSplit[0]);
+        const currentSelectionY = Number(currentSelectionSplit[1]);
+        if (currentSelectionX === coordinatesX) {
+          //horizontal
+          if (
+            checkIfShipFitsHorizontally(
+              shiplength,
+              currentselection,
+              coordinatesarray
+            )
+          ) {
+            goodMove = true;
+          }
         } else {
-          continue;
+          //vertical
+          if (
+            checkIfShipFitsVertically(
+              shiplength,
+              currentselection,
+              coordinatesarray
+            )
+          ) {
+            goodMove = true;
+          }
         }
       }
     } else {
@@ -114,7 +148,7 @@ const selectShipLocation = (function () {
       }
       if (coordinatesX[0] === coordinatesX[1]) {
         //horizontal
-        coordinatesY.sort();
+        coordinatesY.sort(sorter);
         const westCoord = coordinatesX[0] + "-" + (coordinatesY[0] - 1);
         const eastCoord =
           coordinatesX[0] + "-" + (coordinatesY[coordinatesY.length - 1] + 1);
@@ -123,7 +157,7 @@ const selectShipLocation = (function () {
         }
       } else {
         //vertical
-        coordinatesX.sort();
+        coordinatesX.sort(sorter);
         const northCoord = coordinatesX[0] - 1 + "-" + coordinatesY[0];
         const southCoord =
           coordinatesX[coordinatesX.length - 1] + 1 + "-" + coordinatesY[0];
@@ -138,7 +172,77 @@ const selectShipLocation = (function () {
     return goodMove;
   }
 
-  function checkIfShipFits(currentship, coord) {}
+  function checkIfShipFitsVertically(shiplength, coord, coordinatesarray) {
+    const selectedCoord = coord.split("-");
+    const selectedX = Number(selectedCoord[0]);
+    const selectedY = Number(selectedCoord[1]);
+    let availablespacesY = 0;
+    for (let i = 0; i < shiplength; i++) {
+      const nextDivID = selectedX + i + "-" + selectedY;
+      const nextDivNode = document.getElementById(nextDivID);
+      if (
+        nextDivNode !== null &&
+        nextDivNode.classList.contains("notSelectedA")
+      ) {
+        ++availablespacesY;
+      }
+    }
+
+    for (let j = 0; j < shiplength; j++) {
+      const previousDivID = selectedX - j + "-" + selectedY;
+      const previousDivNode = document.getElementById(previousDivID);
+      if (
+        previousDivNode !== null &&
+        previousDivNode.classList.contains("notSelectedA")
+      ) {
+        ++availablespacesY;
+      }
+    }
+
+    if (availablespacesY >= shiplength - coordinatesarray.length) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  function checkIfShipFitsHorizontally(shiplength, coord, coordinatesarray) {
+    const selectedCoord = coord.split("-");
+    const selectedX = Number(selectedCoord[0]);
+    const selectedY = Number(selectedCoord[1]);
+
+    let availablespacesX = 0;
+    for (let i = 0; i < shiplength; i++) {
+      const nextDivID = selectedX + "-" + (selectedY + i);
+      const nextDivNode = document.getElementById(nextDivID);
+      if (
+        nextDivNode !== null &&
+        nextDivNode.classList.contains("notSelectedA")
+      ) {
+        ++availablespacesX;
+      } else {
+        break;
+      }
+    }
+
+    for (let j = 0; j < shiplength; j++) {
+      const previousDivID = selectedX + "-" + (selectedY - j);
+      const previousDivNode = document.getElementById(previousDivID);
+      if (
+        previousDivNode !== null &&
+        previousDivNode.classList.contains("notSelectedA")
+      ) {
+        ++availablespacesX;
+      } else {
+        break;
+      }
+    }
+    if (availablespacesX >= shiplength - coordinatesarray.length) {
+      return true;
+    } else {
+      return false;
+    }
+  }
 
   function checkIfFinished(currentship, coord) {
     const divs = document.querySelectorAll(".selectedA" + placed);
@@ -171,6 +275,19 @@ const attackonclick = function (e) {
   const divcoord = [divID.replace("-", ",")];
   div.removeEventListener("click", attackonclick);
   gamestatus = gameLoop(divcoord, playerA, playerB);
+  const newmove = document.createElement("h3");
+  const moves = document.getElementById("moves");
+  if (div.classList.contains("hit")) {
+    newmove.textContent = "You have hit a ship!";
+  } else {
+    newmove.textContent = "You missed.";
+  }
+  const movesDisplayed = document.querySelectorAll("#moves");
+  const numberOfMoves = movesDisplayed[0].childNodes.length;
+  if (numberOfMoves === 7) {
+    movesDisplayed[0].removeChild(movesDisplayed[0].firstChild);
+  }
+  moves.appendChild(newmove);
   const advboard = document.getElementById("advBoard");
   const allemptydivs = advboard.querySelectorAll(".notSelectedB");
   allemptydivs.forEach((element) =>
@@ -193,6 +310,26 @@ const continueplaying = function () {
   );
 };
 
+const domPlayerB = function (hitormissBvsA, div) {
+  div.classList.add("selectedbyB");
+  if (hitormissBvsA === "hit" || hitormissBvsA === "gameover") {
+    div.classList.add("hit");
+  }
+  const newmove = document.createElement("h3");
+  const moves = document.getElementById("moves");
+  if (hitormissBvsA === "hit") {
+    newmove.textContent = "Player B hit one of your ships.";
+  } else if (hitormissBvsA === "miss") {
+    newmove.textContent = "Player B missed.";
+  }
+  const movesDisplayed = document.querySelectorAll("#moves");
+  const numberOfMoves = movesDisplayed[0].childNodes.length;
+  if (numberOfMoves === 7) {
+    movesDisplayed[0].removeChild(movesDisplayed[0].firstChild);
+  }
+  moves.appendChild(newmove);
+};
+
 const checkForEndOfGame = function () {
   console.log(gamestatus);
   if (gamestatus) {
@@ -206,15 +343,18 @@ const checkForEndOfGame = function () {
   }
 };
 
+const sorter = function (a, b) {
+  return a - b;
+};
+
 //to do
 
 // remover a informacao que é para atacar.
 // sempre que um navio se afundar dizer. e a quem é que o navio pertencia
 // quando ha um hit escrever que ha para alem de mudar a cor
 // mudar a cor desse navio
-// manter a largura igual independente da extensao do texto
 // legenda das cores e mudar as cores
 // game over e dizer quem é que ganhou
 // talvez melhorar o AI
 
-// nao estou a verificar que os quadrados escolhidos sao cnsecutivos
+// se calhar as moves ficavam melhor por ordem em vez de subsituir
