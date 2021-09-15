@@ -22,7 +22,7 @@ const createShip = function (length, name, player) {
     constructor(length, name, player) {
       this.length = length;
       this.player = player;
-      this.name = name + " " + player;
+      this.name = name;
       this.hits = createArrayHits(this.length);
       this.sunk = checkIfSunk(this.hits);
       this.coordinates = [];
@@ -37,11 +37,11 @@ const createShip = function (length, name, player) {
 };
 
 const createShipFleet = function (player) {
-  const carrier = createShip(5, "carrier", player);
-  const battleship = createShip(4, "battleship", player);
-  const destroyer = createShip(3, "destroyer", player);
-  const submarine = createShip(3, "submarine", player);
-  const patrolboat = createShip(2, "patrolboat", player);
+  const carrier = createShip(5, "Carrier", player);
+  const battleship = createShip(4, "Battleship", player);
+  const destroyer = createShip(3, "Destroyer", player);
+  const submarine = createShip(3, "Submarine", player);
+  const patrolboat = createShip(2, "Patrolboat", player);
   const shiparray = [carrier, battleship, destroyer, submarine, patrolboat];
   return shiparray;
 };
