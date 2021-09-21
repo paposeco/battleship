@@ -1,5 +1,5 @@
 import "./style.css";
-import { startGame, setupPlayers, attack, gameLoop } from "./gameboard.js";
+import { startGame, setupPlayers, gameLoop } from "./gameboard.js";
 export { domPlayerB };
 
 const playerBoard = document.getElementById("playerBoard");
@@ -66,7 +66,9 @@ const selectShipLocation = (function () {
     let coordinatesLength;
     const shipLength = currentship.length;
     const shipName = currentship.name;
+
     currentshiptitle.textContent = `Select ${shipLength} consecutive squares for placing your ${shipName}.`;
+
     const alldivs = document.querySelectorAll(".notSelectedA");
     function selectSquare(e) {
       const divid = e.target.id;
@@ -82,7 +84,12 @@ const selectShipLocation = (function () {
             element.removeEventListener("click", selectSquare);
           });
           if (placed < 5) {
-            placeAllShips();
+            setTimeout(placeAllShips, 500);
+          } else {
+            const otherplayerdiv = document.getElementById("otherplayer");
+            const fleetsdiv = document.getElementById("fleets");
+            otherplayerdiv.style.visibility = "visible";
+            fleetsdiv.style.visibility = "visible";
           }
         }
       } else {
@@ -95,8 +102,19 @@ const selectShipLocation = (function () {
   }
 
   function placeAllShips() {
+    increasefont();
+    setTimeout(decreasefont, 500);
     const shipsToBePlaced = playerA.ships;
     placeShip(shipsToBePlaced[placed]);
+  }
+
+  function increasefont() {
+    const shiptitle = document.getElementById("currentShip");
+    shiptitle.style.fontSize = "18px";
+  }
+  function decreasefont() {
+    const shiptitle = document.getElementById("currentShip");
+    shiptitle.style.fontSize = "16px";
   }
 
   function checkConsecutiveSquares(
@@ -345,7 +363,7 @@ const continueplaying = function () {
   );
 };
 
-const domPlayerB = function (hitormissBvsA, div) {
+const domPlayerB = function (hitormissBvsA, div, sunkornot) {
   div.classList.add("selectedbyB");
   if (hitormissBvsA === "hit" || hitormissBvsA === "gameover") {
     div.classList.add("hit");
@@ -358,6 +376,15 @@ const domPlayerB = function (hitormissBvsA, div) {
   if (hitormissBvsA === "hit") {
     // newmove.textContent = `[${divid}]: The computer hit one of your ships.`;
     newmove.innerHTML = `<span class="movecounter">${nummoves}</span> [${divid}]: The computer hit one of your ships.`;
+    if (sunkornot !== "standing") {
+      const sunkedshipname = sunkornot.toLowerCase();
+      const sunkedshipH3Id = sunkedshipname + "P";
+      const shipOnDom = document.getElementById(sunkedshipH3Id);
+      shipOnDom.classList.add("sunk");
+      const sunkship = document.getElementById("sunkship");
+      sunkship.textContent =
+        "Latest casualty: Your " + sunkornot + " has sunk.";
+    }
   } else if (hitormissBvsA === "miss") {
     // newmove.textContent = `[${divid}]: The computer missed.`;
     newmove.innerHTML = `<span class="movecounter">${nummoves}</span> [${divid}]: The computer missed.`;
@@ -371,10 +398,7 @@ const domPlayerB = function (hitormissBvsA, div) {
 };
 
 const checkForEndOfGame = function () {
-  console.log(gamestatus);
   if (gamestatus) {
-    const info = document.getElementById("currentShip");
-    info.textContent = "GameOver";
     const advboard = document.getElementById("advBoard");
     const allemptydivs = advboard.querySelectorAll(".notSelectedB");
     allemptydivs.forEach((element) =>
@@ -389,10 +413,5 @@ const sorter = function (a, b) {
 
 //to do
 
-// remover a informacao que é para atacar.
-// sempre que um navio se afundar dizer. e a quem é que o navio pertencia
-
 // mudar a cor desse navio
 // legenda das cores e mudar as cores
-// game over e dizer quem é que ganhou
-// talvez melhorar o AI

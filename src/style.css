@@ -27,24 +27,66 @@ body {
   gap: 4px;
 }
 
+#otherplayer {
+  visibility: hidden;
+}
+
+#currentShip {
+  transition: all 3s ease-in-out;
+}
+
 .selectedA0,
 .selectedA1,
 .selectedA2,
 .selectedA3,
 .selectedA4 {
-  background-color: darkgreen;
+  background-color: #283e45;
 }
 
 .selectedB {
-  background-color: red;
+  background-color: #507d8b;
 }
 
 .selectedbyB {
-  background-color: red;
+  background-color: #507d8b;
 }
 
 .hit {
-  background-color: black;
+  background-color: #8b5e50;
+}
+
+#squarePlaced,
+#squareMiss,
+#squareHit {
+  width: 20px;
+  height: 20px;
+  border: solid 1px grey;
+}
+
+#squarePlaced {
+  background-color: #283e45;
+}
+
+#squareMiss {
+  background-color: #507d8b;
+}
+
+#squareHit {
+  background-color: #8b5e50;
+}
+
+.labels {
+  display: flex;
+  flex-direction: row;
+  gap: 5px;
+}
+
+.labelsout {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  margin-top: 20px;
+  margin-left: 10px;
 }
 
 #topnumberJ,
@@ -95,6 +137,14 @@ body {
   display: flex;
   flex-direction: row;
   gap: 20px;
+  width: 400px;
+  margin: auto;
+  visibility: hidden;
+}
+
+#fleets div {
+  width: 200px;
+  text-align: center;
 }
 
 .sunk {

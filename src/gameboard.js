@@ -203,12 +203,13 @@ const placeShips = (function () {
     row = Number(randomLocation[0]);
     column = Number(randomLocation[1]);
     const selectInitialPlacement = checkForFit(currentship, boardobj);
-    if (selectInitialPlacement === "fails check") {
+    if (selectInitialPlacement === "fails check" || !selectInitialPlacement) {
       return changeBoard(boardobj, currentship);
     }
-    if (!selectInitialPlacement) {
-      return "ERROR ERROR";
-    }
+    // if (!selectInitialPlacement) {
+    //   console.log("error");
+    //   return "ERROR ERROR";
+    // }
     const currentshiplength = currentship.length;
     const boatOrientation = selectInitialPlacement[2];
     let coordinatesToChange = [];
@@ -293,19 +294,19 @@ const attack = function (attacker, victim, coordinates) {
           const sunkenShips = countSunkenShips(victimsFleet);
           if (sunkenShips === 5) {
             //console.log("gameover");
-            return "gameover";
+            return ["gameover", victimsFleet[i].name];
           } else {
             return ["hit", victimsFleet[i].name];
           }
         }
-        return "hit";
+        return ["hit", "standing"];
       }
     }
   } else {
     //console.log("miss");
     victimsBoard.coordinates[coordinates] = "m";
     attackerAdvBoard.coordinates[coordinates] = "m";
-    return "miss";
+    return ["miss", ""];
   }
 };
 
@@ -367,7 +368,9 @@ function gameLoop(location, playerA, playerB) {
   // player A attacks
   const locationtemp = location.toString().split(",");
   const finallocation = [Number(locationtemp[0]), Number(locationtemp[1])];
-  const hitormissAvsB = attack(playerA, playerB, finallocation);
+  const attackResult = attack(playerA, playerB, finallocation);
+  const hitormissAvsB = attackResult[0];
+  const sunkStatusB = attackResult[1];
   //console.log(hitormissAvsB);
 
   if (hitormissAvsB === "hit" || hitormissAvsB === "gameover") {
@@ -376,11 +379,27 @@ function gameLoop(location, playerA, playerB) {
     const findDivOther = otherplayerboard.querySelector(
       `[id="${transformcoordtoidLocation}"]`
     );
-    //console.log(findDivOther);
+
     findDivOther.classList.add("hit");
   }
+
+  if (sunkStatusB !== "" && sunkStatusB !== "standing") {
+    const sunkedshipname = sunkStatusB.toLowerCase();
+    const sunkedshipH3Id = sunkedshipname + "Adv";
+    const shipOnDom = document.getElementById(sunkedshipH3Id);
+    shipOnDom.classList.add("sunk");
+    const sunkship = document.getElementById("sunkship");
+    sunkship.textContent =
+      "Latest Casualty: Computer's " + sunkStatusB + " has sunk.";
+  }
   if (hitormissAvsB === "gameover") {
+    const sunkedshipname = sunkStatusB.toLowerCase();
+    const sunkedshipH3Id = sunkedshipname + "Adv";
+    const shipOnDom = document.getElementById(sunkedshipH3Id);
+    shipOnDom.classList.add("sunk");
     stop = true;
+    const info = document.getElementById("currentShip");
+    info.textContent = "Game Over. You are the winner!";
     return stop;
   }
 
@@ -399,13 +418,17 @@ function gameLoop(location, playerA, playerB) {
   const transformcoordtoid = selectedLocation.toString().replace(",", "-");
   const mainplayerboard = document.getElementById("mainplayer");
   const findDiv = mainplayerboard.querySelector(`[id="${transformcoordtoid}"]`);
-  const hitormissBvsA = attack(playerB, playerA, selectedLocation);
+  const attackResultComputer = attack(playerB, playerA, selectedLocation);
+  const hitormissBvsA = attackResultComputer[0];
+  const sunkStatusA = attackResultComputer[1];
 
   setTimeout(function () {
-    domPlayerB(hitormissBvsA, findDiv);
-  }, 1500);
+    domPlayerB(hitormissBvsA, findDiv, sunkStatusA);
+  }, 1000);
 
   if (hitormissBvsA === "gameover") {
+    const info = document.getElementById("currentShip");
+    info.textContent = "Game Over. The Computer is the winner!";
     stop = true;
     return stop;
   }
