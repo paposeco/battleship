@@ -8,16 +8,42 @@
     <div id="battlefield">
       <div id="mainplayer">
         <h2>Your Board</h2>
-        <div id="playerBoard"></div>
+        <div id="topnumberJ"></div>
+        <div id="divoutside">
+          <div id="numberI"></div>
+          <div id="playerBoard"></div>
+        </div>
       </div>
       <div id="otherplayer" style="hidden">
-        <h2>B's Board</h2>
-        <div id="advBoard"></div>
+        <h2>Computer's Board</h2>
+        <div id="topnumberJAdv"></div>
+        <div id="divoutsideAdv">
+          <div id="numberIAdv"></div>
+          <div id="advBoard"></div>
+        </div>
       </div>
       <div id="moves"></div>
     </div>
     <div id="setupShips">
       <h3 id="currentShip"></h3>
+    </div>
+    <div id="fleets">
+      <div id="ships">
+        <h3>Your Fleet</h3>
+        <h3 id="carrierP">Carrier</h3>
+        <h3 id="battleshipP">Battleship</h3>
+        <h3 id="destroyerP">Destroyer</h3>
+        <h3 id="submarineP">Submarine</h3>
+        <h3 id="patrolboatP">Patrolboat</h3>
+      </div>
+      <div id="shipsAdv">
+        <h3>Computers' Fleet</h3>
+        <h3 id="carrierAdv">Carrier</h3>
+        <h3 id="battleshipAdv">Battleship</h3>
+        <h3 id="destroyerAdv">Destroyer</h3>
+        <h3 id="submarineAdv">Submarine</h3>
+        <h3 class="sunk" id="patrolboatAdv">Patrolboat</h3>
+      </div>
     </div>
     <script src="main.js"></script>
   </body>

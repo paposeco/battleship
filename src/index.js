@@ -7,10 +7,40 @@ const advBoard = document.getElementById("advBoard");
 //i'm atributting coordinates do player's A ships, and changing them later according to user input
 let playerA = setupPlayers("playerA", [], {}, {});
 let playerB = setupPlayers("playerB", [], {}, {});
+let nummoves = 0;
 const updatedPlayers = startGame(playerA, playerB);
 
 playerA = updatedPlayers[0];
 playerB = updatedPlayers[1];
+
+//onpageload
+
+const topnumber = document.getElementById("topnumberJ");
+const topnumberAdv = document.getElementById("topnumberJAdv");
+for (let k = 0; k <= 10; k++) {
+  const div = document.createElement("div");
+  const diva = document.createElement("div");
+  if (k === 0) {
+    div.textContent = "";
+    diva.textContent = "";
+  } else {
+    div.textContent = k;
+    diva.textContent = k;
+  }
+  topnumber.appendChild(div);
+  topnumberAdv.appendChild(diva);
+}
+
+const numberI = document.getElementById("numberI");
+const numberIAdv = document.getElementById("numberIAdv");
+for (let z = 1; z <= 10; z++) {
+  const div = document.createElement("div");
+  const diva = document.createElement("div");
+  div.textContent = z;
+  diva.textContent = z;
+  numberI.appendChild(div);
+  numberIAdv.appendChild(diva);
+}
 
 for (let i = 1; i <= 10; i++) {
   for (let j = 1; j <= 10; j++) {
@@ -276,18 +306,23 @@ const attackonclick = function (e) {
   div.removeEventListener("click", attackonclick);
   gamestatus = gameLoop(divcoord, playerA, playerB);
   const newmove = document.createElement("h3");
-  const moves = document.getElementById("moves");
+  ++nummoves;
+
   if (div.classList.contains("hit")) {
-    newmove.textContent = "You have hit a ship!";
+    newmove.innerHTML = `<span class="movecounter">${nummoves}</span> [${divID}]: You have hit a ship!`;
+    //newmove.textContent = `[${divID}]: You have hit a ship! `;
   } else {
-    newmove.textContent = "You missed.";
+    newmove.innerHTML = `<span class="movecounter">${nummoves}</span> [${divID}]: You missed`;
+    //    newmove.textContent = `[${divID}]: You missed. `;
   }
   const movesDisplayed = document.querySelectorAll("#moves");
   const numberOfMoves = movesDisplayed[0].childNodes.length;
   if (numberOfMoves === 7) {
     movesDisplayed[0].removeChild(movesDisplayed[0].firstChild);
   }
+
   moves.appendChild(newmove);
+  // moves.insertBefore(span, newmove);
   const advboard = document.getElementById("advBoard");
   const allemptydivs = advboard.querySelectorAll(".notSelectedB");
   allemptydivs.forEach((element) =>
@@ -316,11 +351,16 @@ const domPlayerB = function (hitormissBvsA, div) {
     div.classList.add("hit");
   }
   const newmove = document.createElement("h3");
+  newmove.setAttribute("class", "opponentmove");
   const moves = document.getElementById("moves");
+  nummoves++;
+  const divid = div.getAttribute("id");
   if (hitormissBvsA === "hit") {
-    newmove.textContent = "Player B hit one of your ships.";
+    // newmove.textContent = `[${divid}]: The computer hit one of your ships.`;
+    newmove.innerHTML = `<span class="movecounter">${nummoves}</span> [${divid}]: The computer hit one of your ships.`;
   } else if (hitormissBvsA === "miss") {
-    newmove.textContent = "Player B missed.";
+    // newmove.textContent = `[${divid}]: The computer missed.`;
+    newmove.innerHTML = `<span class="movecounter">${nummoves}</span> [${divid}]: The computer missed.`;
   }
   const movesDisplayed = document.querySelectorAll("#moves");
   const numberOfMoves = movesDisplayed[0].childNodes.length;
@@ -351,10 +391,8 @@ const sorter = function (a, b) {
 
 // remover a informacao que é para atacar.
 // sempre que um navio se afundar dizer. e a quem é que o navio pertencia
-// quando ha um hit escrever que ha para alem de mudar a cor
+
 // mudar a cor desse navio
 // legenda das cores e mudar as cores
 // game over e dizer quem é que ganhou
 // talvez melhorar o AI
-
-// se calhar as moves ficavam melhor por ordem em vez de subsituir

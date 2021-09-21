@@ -268,18 +268,18 @@ const attack = function (attacker, victim, coordinates) {
   const boardStatusOnCoordinates = victimsBoard.coordinates[coordinates];
   const transformedCoordinates = [coordinates[0] + "," + coordinates[1]];
   if (boardStatusOnCoordinates === 1) {
-    console.log("hit");
+    //console.log("hit");
     for (let i = 0; i < victimsFleet.length; i++) {
       const arrayOfCoordinates = victimsFleet[i].coordinates.flat();
       const isItThisShip = arrayOfCoordinates.includes(
         transformedCoordinates[0]
       );
-      console.log(victimsFleet[i]);
-      console.log("coordinates");
-      console.log(coordinates);
-      console.log("transformed");
-      console.log(transformedCoordinates);
-      console.log("isit" + isItThisShip);
+      // console.log(victimsFleet[i]);
+      // console.log("coordinates");
+      // console.log(coordinates);
+      // console.log("transformed");
+      // console.log(transformedCoordinates);
+      // console.log("isit" + isItThisShip);
       if (isItThisShip) {
         const hitIndex = arrayOfCoordinates.findIndex(
           (element) => element === transformedCoordinates[0]
@@ -292,15 +292,17 @@ const attack = function (attacker, victim, coordinates) {
           console.log("ship sunk: " + victimsFleet[i].name);
           const sunkenShips = countSunkenShips(victimsFleet);
           if (sunkenShips === 5) {
-            console.log("gameover");
+            //console.log("gameover");
             return "gameover";
+          } else {
+            return ["hit", victimsFleet[i].name];
           }
         }
         return "hit";
       }
     }
   } else {
-    console.log("miss");
+    //console.log("miss");
     victimsBoard.coordinates[coordinates] = "m";
     attackerAdvBoard.coordinates[coordinates] = "m";
     return "miss";

@@ -1,5 +1,5 @@
 body {
-  width: 900px;
+  width: 1100px;
   height: 600px;
   margin: 200px auto;
 }
@@ -45,4 +45,58 @@ body {
 
 .hit {
   background-color: black;
+}
+
+#topnumberJ,
+#topnumberJAdv {
+  display: grid;
+  grid-template-columns: repeat(11, 22px);
+  gap: 4px;
+}
+
+#topnumberJ div,
+#topnumberJAdv div {
+  width: 20px;
+  height: 20px;
+  text-align: center;
+}
+
+#divoutside,
+#divoutsideAdv {
+  display: flex;
+  flex-direction: row;
+}
+
+#numberI,
+#numberIAdv {
+  display: grid;
+  grid-template-rows: repeat(10, 22px);
+  gap: 4px;
+  margin-right: 4px;
+}
+
+#numberI div,
+#numberIAdv div {
+  width: 20px;
+  height: 20px;
+  text-align: center;
+}
+
+.opponentmove {
+  color: grey;
+}
+
+.movecounter {
+  color: lightgrey;
+  font-weight: normal;
+}
+
+#fleets {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+}
+
+.sunk {
+  text-decoration: line-through;
 }
