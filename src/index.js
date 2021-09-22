@@ -66,8 +66,12 @@ const selectShipLocation = (function () {
     let coordinatesLength;
     const shipLength = currentship.length;
     const shipName = currentship.name;
+    if (shipName !== "Carrier") {
+      increasefont();
+      setTimeout(decreasefont, 600);
+    }
 
-    currentshiptitle.textContent = `Select ${shipLength} consecutive squares for placing your ${shipName}.`;
+    currentshiptitle.textContent = `Setup your fleet: select ${shipLength} consecutive spots for placing your ${shipName}.`;
 
     const alldivs = document.querySelectorAll(".notSelectedA");
     function selectSquare(e) {
@@ -84,12 +88,13 @@ const selectShipLocation = (function () {
             element.removeEventListener("click", selectSquare);
           });
           if (placed < 5) {
-            setTimeout(placeAllShips, 500);
+            placeAllShips();
           } else {
             const otherplayerdiv = document.getElementById("otherplayer");
             const fleetsdiv = document.getElementById("fleets");
             otherplayerdiv.style.visibility = "visible";
             fleetsdiv.style.visibility = "visible";
+            createShipReference();
           }
         }
       } else {
@@ -101,9 +106,30 @@ const selectShipLocation = (function () {
     });
   }
 
+  function createShipReference() {
+    const shipclasses = [
+      "fleetcarrier",
+      "fleetbattleship",
+      "fleetdestroyer",
+      "fleetsubmarine",
+      "fleetpatrol",
+    ];
+    const shipNumberSquares = [5, 4, 3, 3, 2];
+
+    for (let i = 0; i < shipNumberSquares.length; i++) {
+      const currentdivSelector = "." + shipclasses[i];
+      const currentdiv = document.querySelectorAll(currentdivSelector);
+      currentdiv.forEach(function (node) {
+        for (let j = 0; j < shipNumberSquares[i]; j++) {
+          const div = document.createElement("div");
+          div.setAttribute("class", "squarePlaced");
+          node.appendChild(div);
+        }
+      });
+    }
+  }
+
   function placeAllShips() {
-    increasefont();
-    setTimeout(decreasefont, 500);
     const shipsToBePlaced = playerA.ships;
     placeShip(shipsToBePlaced[placed]);
   }
@@ -114,7 +140,7 @@ const selectShipLocation = (function () {
   }
   function decreasefont() {
     const shiptitle = document.getElementById("currentShip");
-    shiptitle.style.fontSize = "16px";
+    shiptitle.style.fontSize = "17px";
   }
 
   function checkConsecutiveSquares(
@@ -374,19 +400,20 @@ const domPlayerB = function (hitormissBvsA, div, sunkornot) {
   nummoves++;
   const divid = div.getAttribute("id");
   if (hitormissBvsA === "hit") {
-    // newmove.textContent = `[${divid}]: The computer hit one of your ships.`;
     newmove.innerHTML = `<span class="movecounter">${nummoves}</span> [${divid}]: The computer hit one of your ships.`;
     if (sunkornot !== "standing") {
       const sunkedshipname = sunkornot.toLowerCase();
       const sunkedshipH3Id = sunkedshipname + "P";
       const shipOnDom = document.getElementById(sunkedshipH3Id);
+      const shipReferenceDiv = shipOnDom.nextElementSibling;
+      const alldivsInside = shipReferenceDiv.querySelectorAll("div");
+      alldivsInside.forEach((div) => (div.style.backgroundColor = "lightgrey"));
       shipOnDom.classList.add("sunk");
       const sunkship = document.getElementById("sunkship");
       sunkship.textContent =
         "Latest casualty: Your " + sunkornot + " has sunk.";
     }
   } else if (hitormissBvsA === "miss") {
-    // newmove.textContent = `[${divid}]: The computer missed.`;
     newmove.innerHTML = `<span class="movecounter">${nummoves}</span> [${divid}]: The computer missed.`;
   }
   const movesDisplayed = document.querySelectorAll("#moves");
@@ -410,8 +437,3 @@ const checkForEndOfGame = function () {
 const sorter = function (a, b) {
   return a - b;
 };
-
-//to do
-
-// mudar a cor desse navio
-// legenda das cores e mudar as cores

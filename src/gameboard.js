@@ -387,6 +387,9 @@ function gameLoop(location, playerA, playerB) {
     const sunkedshipname = sunkStatusB.toLowerCase();
     const sunkedshipH3Id = sunkedshipname + "Adv";
     const shipOnDom = document.getElementById(sunkedshipH3Id);
+    const shipReferenceDiv = shipOnDom.nextElementSibling;
+    const alldivsInside = shipReferenceDiv.querySelectorAll("div");
+    alldivsInside.forEach((div) => (div.style.backgroundColor = "lightgrey"));
     shipOnDom.classList.add("sunk");
     const sunkship = document.getElementById("sunkship");
     sunkship.textContent =
