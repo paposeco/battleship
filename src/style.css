@@ -1,14 +1,22 @@
 html {
   box-sizing: border-box;
   height: 99vh;
+  font-family: "Inter", sans-serif;
+  background-image: url("background3.png");
+  background-color: #fafcff;
 }
 
 body {
   width: 1100px;
-  height: calc(100% - 60px);
-  margin: 30px auto 10px auto;
+  height: 91%;
+  margin: 20px auto;
+  /* height: calc(100% - 60px); */
+  /* margin: 30px auto 10px auto; */
+  padding: 30px 60px;
   display: flex;
   flex-direction: column;
+  background-color: white;
+  /* background-color: #fffdfa; */
 }
 
 #battlefield {
@@ -183,7 +191,28 @@ body {
 }
 
 footer {
-  margin: 20px auto 10px auto;
+  /* margin: 20px auto 20px auto; */
   text-align: center;
   justify-self: end;
+  background-color: white;
+  /* padding: 20px 60px; */
+  width: 100%;
+}
+
+a {
+  color: #283e45;
+}
+
+a:visited {
+  color: #8b5e50;
+}
+
+a:hover {
+  color: #507d8b;
+}
+
+.winnerannoucement {
+  font-size: 30px !important;
+  font-weight: bolder;
+  text-align: center;
 }

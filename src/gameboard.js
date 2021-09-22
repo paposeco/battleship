@@ -402,6 +402,7 @@ function gameLoop(location, playerA, playerB) {
     shipOnDom.classList.add("sunk");
     stop = true;
     const info = document.getElementById("currentShip");
+    info.classList.add("winnerannoucement");
     info.textContent = "Game Over. You are the winner!";
     return stop;
   }
@@ -431,6 +432,7 @@ function gameLoop(location, playerA, playerB) {
 
   if (hitormissBvsA === "gameover") {
     const info = document.getElementById("currentShip");
+    info.classList.add("winnerannoucement");
     info.textContent = "Game Over. The Computer is the winner!";
     stop = true;
     return stop;
