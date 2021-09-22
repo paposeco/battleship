@@ -2,64 +2,111 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <link
+      rel="stylesheet"
+      href="https://maxst.icons8.com/vue-static/landings/line-awesome/line-awesome/1.3.0/css/line-awesome.min.css"
+    />
     <title>Battleship</title>
   </head>
   <body>
-    <div id="battlefield">
-      <div id="mainplayer">
-        <h2>Your Board</h2>
-        <div id="topnumberJ"></div>
-        <div id="divoutside">
-          <div id="numberI"></div>
-          <div id="playerBoard"></div>
+    <div id="content">
+      <h1>Battleship</h1>
+      <p>Play against the computer in easy mode.</p>
+      <p>
+        Start by placing your fleet as instructed. The game will start when you
+        are done.
+      </p>
+      <div id="battlefield">
+        <div id="mainplayer">
+          <h2>Your Board</h2>
+          <div id="topnumberJ"></div>
+          <div id="divoutside">
+            <div id="numberI"></div>
+            <div id="playerBoard"></div>
+          </div>
+        </div>
+        <div id="otherplayer">
+          <h2>Computer's Board</h2>
+          <div id="topnumberJAdv"></div>
+          <div id="divoutsideAdv">
+            <div id="numberIAdv"></div>
+            <div id="advBoard"></div>
+          </div>
+        </div>
+        <div id="moves"></div>
+      </div>
+      <div class="labelsout">
+        <div class="labels">
+          <div class="squarePlaced"></div>
+          Ship placed
+        </div>
+        <div class="labels">
+          <div id="squareMiss"></div>
+          Miss
+        </div>
+        <div class="labels">
+          <div id="squareHit"></div>
+          Hit
         </div>
       </div>
-      <div id="otherplayer">
-        <h2>Computer's Board</h2>
-        <div id="topnumberJAdv"></div>
-        <div id="divoutsideAdv">
-          <div id="numberIAdv"></div>
-          <div id="advBoard"></div>
+      <div id="setupShips">
+        <p id="currentShip"></p>
+        <h3 id="sunkship">&nbsp</h3>
+      </div>
+      <div id="fleets">
+        <div id="ships">
+          <h3>Your Fleet</h3>
+          <div class="shipdescription">
+            <p id="carrierP">Carrier</p>
+            <div class="fleetcarrier"></div>
+          </div>
+          <div class="shipdescription">
+            <p id="battleshipP">Battleship</p>
+            <div class="fleetbattleship"></div>
+          </div>
+          <div class="shipdescription">
+            <p id="destroyerP">Destroyer</p>
+            <div class="fleetdestroyer"></div>
+          </div>
+          <div class="shipdescription">
+            <p id="submarineP">Submarine</p>
+            <div class="fleetsubmarine"></div>
+          </div>
+          <div class="shipdescription">
+            <p id="patrolboatP">Patrolboat</p>
+            <div class="fleetpatrol"></div>
+          </div>
+        </div>
+        <div id="shipsAdv">
+          <h3>Computers' Fleet</h3>
+          <div class="shipdescription">
+            <p id="carrierAdv">Carrier</p>
+            <div class="fleetcarrier"></div>
+          </div>
+          <div class="shipdescription">
+            <p id="battleshipAdv">Battleship</p>
+            <div class="fleetbattleship"></div>
+          </div>
+          <div class="shipdescription">
+            <p id="destroyerAdv">Destroyer</p>
+            <div class="fleetdestroyer"></div>
+          </div>
+          <div class="shipdescription">
+            <p id="submarineAdv">Submarine</p>
+            <div class="fleetsubmarine"></div>
+          </div>
+          <div class="shipdescription">
+            <p id="patrolboatAdv">Patrolboat</p>
+            <div class="fleetpatrol"></div>
+          </div>
         </div>
       </div>
-      <div id="moves"></div>
     </div>
-    <div class="labelsout">
-      <div class="labels">
-        <div id="squarePlaced"></div>
-        Ship placed
-      </div>
-      <div class="labels">
-        <div id="squareMiss"></div>
-        Miss
-      </div>
-      <div class="labels">
-        <div id="squareHit"></div>
-        Hit
-      </div>
-    </div>
-    <div id="setupShips">
-      <h3 id="currentShip"></h3>
-      <h3 id="sunkship">&nbsp</h3>
-    </div>
-    <div id="fleets">
-      <div id="ships">
-        <h3>Your Fleet</h3>
-        <p id="carrierP">Carrier</p>
-        <p id="battleshipP">Battleship</p>
-        <p id="destroyerP">Destroyer</p>
-        <p id="submarineP">Submarine</p>
-        <p id="patrolboatP">Patrolboat</p>
-      </div>
-      <div id="shipsAdv">
-        <h3>Computers' Fleet</h3>
-        <p id="carrierAdv">Carrier</p>
-        <p id="battleshipAdv">Battleship</p>
-        <p id="destroyerAdv">Destroyer</p>
-        <p id="submarineAdv">Submarine</p>
-        <p id="patrolboatAdv">Patrolboat</p>
-      </div>
-    </div>
+    <footer>
+      <a href="https://github.com/paposeco/" alt="github"
+        ><span><i class="lab la-github"></i></span>Fabi</a
+      >
+    </footer>
     <script src="main.js"></script>
   </body>
 </html>
