@@ -1,7 +1,7 @@
 import { createShipFleet } from "./ships.js";
 import { createPlayer } from "./player.js";
 import { domPlayerB } from "./index.js";
-export { startGame, setupPlayers, attack, gameLoop };
+export { startGame, setupPlayers, gameLoop, pickBetterCoord };
 
 //const createShipFleet = require("./ships.js");
 //const createPlayer = require("./player.js");
@@ -253,7 +253,7 @@ const setupBoard = function (player, playerobj) {
     placeShips.changeBoard(newBoard, shipFleet[3]);
     placeShips.changeBoard(newBoard, shipFleet[4]);
   }
-  displayboard(newBoard);
+  //displayboard(newBoard);
   return newBoard;
 };
 
@@ -290,7 +290,7 @@ const attack = function (attacker, victim, coordinates) {
         attackerAdvBoard.coordinates[coordinates] = "x";
         victimsFleet[i].hits;
         if (victimsFleet[i].sunk) {
-          console.log("ship sunk: " + victimsFleet[i].name);
+          //console.log("ship sunk: " + victimsFleet[i].name);
           const sunkenShips = countSunkenShips(victimsFleet);
           if (sunkenShips === 5) {
             //console.log("gameover");
@@ -359,6 +359,9 @@ const displayboard = function (currentboard) {
   }
 };
 
+let lastcoord = [];
+let possiblebetterlocations = [];
+
 function gameLoop(location, playerA, playerB) {
   let stop = false;
   //player A picks a coordinate
@@ -371,7 +374,6 @@ function gameLoop(location, playerA, playerB) {
   const attackResult = attack(playerA, playerB, finallocation);
   const hitormissAvsB = attackResult[0];
   const sunkStatusB = attackResult[1];
-  //console.log(hitormissAvsB);
 
   if (hitormissAvsB === "hit" || hitormissAvsB === "gameover") {
     const transformcoordtoidLocation = location.toString().replace(",", "-");
@@ -408,14 +410,51 @@ function gameLoop(location, playerA, playerB) {
   }
 
   //  player B picks a coordinate
-
-  const selectedLocationRaw = pickLocation(
-    playerB.advgameboard.coordinates
-  ).split(",");
-  const selectedLocation = [
-    Number(selectedLocationRaw[0]),
-    Number(selectedLocationRaw[1]),
-  ];
+  console.log("player B picks");
+  console.log(lastcoord);
+  let selectedLocation;
+  if (lastcoord.length === 0) {
+    const selectedLocationRaw = pickLocation(
+      playerB.advgameboard.coordinates
+    ).split(",");
+    selectedLocation = [
+      Number(selectedLocationRaw[0]),
+      Number(selectedLocationRaw[1]),
+    ];
+  } else if (possiblebetterlocations.length === 0) {
+    possiblebetterlocations = pickBetterCoord(lastcoord, playerB);
+    let selectedLocationOriginal;
+    if (possiblebetterlocations.length === 1) {
+      selectedLocationOriginal = possiblebetterlocations[0].split(",");
+      selectedLocation = [
+        Number(selectedLocationOriginal[0]),
+        Number(selectedLocationOriginal[1]),
+      ];
+    } else {
+      selectedLocationOriginal = possiblebetterlocations[0].split(",");
+      selectedLocation = [
+        Number(selectedLocationOriginal[0]),
+        Number(selectedLocationOriginal[1]),
+      ];
+      possiblebetterlocations = possiblebetterlocations.slice(1);
+    }
+  } else {
+    let selectedLocationOriginal;
+    if (possiblebetterlocations.length === 1) {
+      selectedLocationOriginal = possiblebetterlocations[0].split(",");
+      selectedLocation = [
+        Number(selectedLocationOriginal[0]),
+        Number(selectedLocationOriginal[1]),
+      ];
+    } else {
+      selectedLocationOriginal = possiblebetterlocations[0].split(",");
+      selectedLocation = [
+        Number(selectedLocationOriginal[0]),
+        Number(selectedLocationOriginal[1]),
+      ];
+      possiblebetterlocations = possiblebetterlocations.slice(1);
+    }
+  }
   //console.log("B Location selected: " + selectedLocation);
   //player B attacks
   //console.log(selectedLocation);
@@ -426,9 +465,23 @@ function gameLoop(location, playerA, playerB) {
   const hitormissBvsA = attackResultComputer[0];
   const sunkStatusA = attackResultComputer[1];
 
+  if (
+    hitormissBvsA === "hit" &&
+    (sunkStatusA === "standing" || sunkStatusA === "")
+  ) {
+    lastcoord.push(selectedLocation[0] + "," + selectedLocation[1]);
+    console.log(lastcoord);
+    possiblebetterlocations = [];
+  }
+
   setTimeout(function () {
     domPlayerB(hitormissBvsA, findDiv, sunkStatusA);
   }, 1000);
+
+  if (sunkStatusA !== "standing" && sunkStatusA !== "") {
+    lastcoord = [];
+    possiblebetterlocations = [];
+  }
 
   if (hitormissBvsA === "gameover") {
     const info = document.getElementById("currentShip");
@@ -452,9 +505,105 @@ function startGame(player1, player2) {
   return [player1, player2];
 }
 
+//x,y = 1,2
+function pickBetterCoord(existingCoord, player) {
+  let coordArray = [];
+  if (existingCoord.length === 1) {
+    const splitIt = existingCoord[0].split(",");
+    const initialX = Number(splitIt[0]);
+    const initialY = Number(splitIt[1]);
+    let north, south, west, east;
+    if (initialX - 1 !== 0) {
+      north = initialX - 1 + "," + initialY;
+      if (player.advgameboard.coordinates[north] === 0) {
+        coordArray.push(north);
+      }
+    }
+    if (initialX + 1 !== 11) {
+      south = initialX + 1 + "," + initialY;
+      if (player.advgameboard.coordinates[south] === 0) {
+        coordArray.push(south);
+      }
+    }
+
+    if (initialY - 1 !== 0) {
+      east = initialX + "," + (initialY - 1);
+      if (player.advgameboard.coordinates[east] === 0) {
+        coordArray.push(east);
+      }
+    }
+    if (initialY + 1 !== 11) {
+      west = initialX + "," + (initialY + 1);
+      if (player.advgameboard.coordinates[east] === 0) {
+        coordArray.push(west);
+      }
+    }
+  } else {
+    const arrayCoord = existingCoord;
+    const first = arrayCoord[0].split(",");
+    const second = arrayCoord[1].split(",");
+    let direction;
+    if (first[0] === second[0]) {
+      direction = "horizontal";
+    } else {
+      direction = "vertical";
+    }
+    if (direction === "vertical") {
+      const currentY = arrayCoord[0].split(",")[1];
+      let arrayOfX = [];
+      for (let i = 0; i < arrayCoord.length; i++) {
+        arrayOfX.push(Number(arrayCoord[i].split(",")[0]));
+      }
+      arrayOfX.sort(sorter);
+      let north, south;
+      if (arrayOfX[0] - 1 !== 0) {
+        north = arrayOfX[0] - 1 + "," + currentY;
+        if (player.advgameboard.coordinates[north] === 0) {
+          coordArray.push(north);
+        }
+      }
+      if (arrayOfX[length - 1] + 1 !== 11) {
+        south = arrayOfX[arrayOfX.length - 1] + 1 + "," + currentY;
+        if (player.advgameboard.coordinates[south] === 0) {
+          coordArray.push(south);
+        }
+      }
+    } else {
+      const currentX = arrayCoord[0].split(",")[0];
+      let arrayOfY = [];
+      for (let i = 0; i < arrayCoord.length; i++) {
+        arrayOfY.push(Number(arrayCoord[i].split(",")[1]));
+      }
+      arrayOfY.sort(sorter);
+      let east, west;
+      if (arrayOfY[0] - 1 !== 0) {
+        east = currentX + "," + (arrayOfY[0] - 1);
+        if (player.advgameboard.coordinates[east] === 0) {
+          coordArray.push(east);
+        }
+      }
+      if (arrayOfY[length - 1] !== 11) {
+        west = currentX + "," + (arrayOfY[arrayOfY.length - 1] + 1);
+        if (player.advgameboard.coordinates[west] === 0) {
+          coordArray.push(west);
+        }
+      }
+    }
+  }
+  return coordArray;
+}
+
+const sorter = function (a, b) {
+  return a - b;
+};
+
 //startGame();
 
 // let loopit = gameLoopPrompt();
 // while (!loopit) {
 //   loopit = gameLoopPrompt();
 // }
+
+//ai smarter:
+// ignore empty spaces without other spaces around
+// pick the larger ship not found yet and find space for it on the board: pick the middle square first

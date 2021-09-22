@@ -1,5 +1,10 @@
 import "./style.css";
-import { startGame, setupPlayers, gameLoop } from "./gameboard.js";
+import {
+  startGame,
+  setupPlayers,
+  gameLoop,
+  pickBetterCoord,
+} from "./gameboard.js";
 export { domPlayerB };
 
 const playerBoard = document.getElementById("playerBoard");
@@ -158,7 +163,6 @@ const selectShipLocation = (function () {
           coordinatesarray
         )
       ) {
-        console.log("true");
         return true;
       } else if (
         checkIfShipFitsVertically(
