@@ -1,25 +1,21 @@
 import "./style.css";
-import {
-  startGame,
-  setupPlayers,
-  gameLoop,
-  pickBetterCoord,
-} from "./gameboard.js";
+import { startGame, setupPlayers, gameLoop } from "./gameboard.js";
 export { domPlayerB };
 
 const playerBoard = document.getElementById("playerBoard");
 const advBoard = document.getElementById("advBoard");
-//i'm atributting coordinates do player's A ships, and changing them later according to user input
+
+//starts the player with empty coordinates
 let playerA = setupPlayers("playerA", [], {}, {});
 let playerB = setupPlayers("playerB", [], {}, {});
 let nummoves = 0;
+// starts the coordinates for the players (creates ships for both players and places ships for B)
 const updatedPlayers = startGame(playerA, playerB);
 
 playerA = updatedPlayers[0];
 playerB = updatedPlayers[1];
 
-//onpageload
-
+// displays the column numbers
 const topnumber = document.getElementById("topnumberJ");
 const topnumberAdv = document.getElementById("topnumberJAdv");
 for (let k = 0; k <= 10; k++) {
@@ -36,6 +32,7 @@ for (let k = 0; k <= 10; k++) {
   topnumberAdv.appendChild(diva);
 }
 
+// displays the row numbers
 const numberI = document.getElementById("numberI");
 const numberIAdv = document.getElementById("numberIAdv");
 for (let z = 1; z <= 10; z++) {
@@ -47,6 +44,7 @@ for (let z = 1; z <= 10; z++) {
   numberIAdv.appendChild(diva);
 }
 
+// creates divs for each player and starts them as notselected = empty
 for (let i = 1; i <= 10; i++) {
   for (let j = 1; j <= 10; j++) {
     const divA = document.createElement("div");
@@ -60,13 +58,13 @@ for (let i = 1; i <= 10; i++) {
   }
 }
 
-// place ships
-
 let gamestatus;
+
 const selectShipLocation = (function () {
   let placed = 0;
   function placeShip(currentship) {
     let coordinates = [];
+    //instructs player A on how to add ships to the board
     const currentshiptitle = document.getElementById("currentShip");
     let coordinatesLength;
     const shipLength = currentship.length;
@@ -75,10 +73,11 @@ const selectShipLocation = (function () {
       increasefont();
       setTimeout(decreasefont, 600);
     }
-
     currentshiptitle.textContent = `Setup your fleet: select ${shipLength} consecutive spots for placing your ${shipName}.`;
 
+    //
     const alldivs = document.querySelectorAll(".notSelectedA");
+    // evaluates the player clicks so that the only valid clicks are clicks on empty divs where the current ship might fit; it also only lets the player place ships on consecutive divs
     function selectSquare(e) {
       const divid = e.target.id;
       const legalMove = checkConsecutiveSquares(divid, coordinates, shipLength);
@@ -106,6 +105,7 @@ const selectShipLocation = (function () {
         return;
       }
     }
+    // creates event listeners for every div
     alldivs.forEach(function (element) {
       element.addEventListener("click", selectSquare);
     });
@@ -188,12 +188,12 @@ const selectShipLocation = (function () {
       const legalMoves = [northCoord, southCoord, westCoord, eastCoord];
 
       if (legalMoves.includes(currentselection)) {
-        // with current selection, the ship would be placed how?
+        // with current selection, how would the ship would be placed?
         const currentSelectionSplit = currentselection.split("-");
         const currentSelectionX = Number(currentSelectionSplit[0]);
         const currentSelectionY = Number(currentSelectionSplit[1]);
         if (currentSelectionX === coordinatesX) {
-          //horizontal
+          //horizontally
           if (
             checkIfShipFitsHorizontally(
               shiplength,
@@ -204,7 +204,7 @@ const selectShipLocation = (function () {
             goodMove = true;
           }
         } else {
-          //vertical
+          //vertically
           if (
             checkIfShipFitsVertically(
               shiplength,
@@ -343,7 +343,9 @@ const selectShipLocation = (function () {
   return { placeAllShips };
 })();
 
-selectShipLocation.placeAllShips();
+window.onload = function () {
+  selectShipLocation.placeAllShips();
+};
 
 const attackonclick = function (e) {
   const div = e.target;
@@ -358,10 +360,8 @@ const attackonclick = function (e) {
 
   if (div.classList.contains("hit")) {
     newmove.innerHTML = `<span class="movecounter">${nummoves}</span> [${divID}]: You have hit a ship!`;
-    //newmove.textContent = `[${divID}]: You have hit a ship! `;
   } else {
     newmove.innerHTML = `<span class="movecounter">${nummoves}</span> [${divID}]: You missed`;
-    //    newmove.textContent = `[${divID}]: You missed. `;
   }
   const movesDisplayed = document.querySelectorAll("#moves");
   const numberOfMoves = movesDisplayed[0].childNodes.length;
@@ -370,7 +370,6 @@ const attackonclick = function (e) {
   }
 
   moves.appendChild(newmove);
-  // moves.insertBefore(span, newmove);
   const advboard = document.getElementById("advBoard");
   const allemptydivs = advboard.querySelectorAll(".notSelectedB");
   allemptydivs.forEach((element) =>

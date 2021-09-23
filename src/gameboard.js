@@ -1,11 +1,9 @@
 import { createShipFleet } from "./ships.js";
 import { createPlayer } from "./player.js";
 import { domPlayerB } from "./index.js";
-export { startGame, setupPlayers, gameLoop, pickBetterCoord };
+export { startGame, setupPlayers, gameLoop };
 
-//const createShipFleet = require("./ships.js");
-//const createPlayer = require("./player.js");
-
+//creates a clean gameboard for a player with the valid coordinates
 const createGameboard = function (player) {
   const boardObject = function () {
     let obj = {};
@@ -32,6 +30,7 @@ const getRandomIntInclusive = function (min, max) {
   return Math.floor(Math.random() * (max - min + 1) + min);
 };
 
+//picks a random location that hasn't been picked before (one that  isn't a hit or a miss)
 const pickLocation = function (obj) {
   const objValues = Object.values(obj);
   const objKeys = Object.keys(obj);
@@ -52,6 +51,7 @@ const placeShips = (function () {
   let row;
   let column;
 
+  // from a player board, a ship, orientation and a row or column, checks the values on that column or row (up to the length of the ship) and returns all the coordinates that are empty
   const locationsArray = function (currentboard, currentship, orientation) {
     let newposition;
     let fixedposition;
@@ -106,11 +106,11 @@ const placeShips = (function () {
     return sum;
   };
 
+  // checks if the empty locations are consecutive
   const consecutiveNumbers = function (array, currentshiplength) {
     let goodspot;
     for (let i = 0; i < array.length; i++) {
       const beginningOfShip = array[i];
-      //the first position also counts
       const endOfShip = beginningOfShip + currentshiplength - 1;
       if (endOfShip > array[array.length]) {
         break;
@@ -135,6 +135,7 @@ const placeShips = (function () {
     return a - b;
   };
 
+  //for a certain ship and board, and selected initial location, checks if the boat fits.
   const checkForFit = function (currentship, currentboard) {
     const selectedInitialLocation = row + "," + column;
     const availableSpacesRow = locationsArray(currentboard, currentship, "row")
@@ -147,6 +148,8 @@ const placeShips = (function () {
     )
       .concat(row)
       .sort(compareNumbers);
+
+    // to add some variability to the ship placement, if the row of the initial selected location is an odd number, starts by checking if the ship fits horizontally. if it doesn't fit, it then checks it fits vertically. It does the opposite if the row is an even number.
 
     if (row % 2 === 1) {
       if (availableSpacesRow.length < currentship.length) {
@@ -198,6 +201,8 @@ const placeShips = (function () {
       }
     }
   };
+
+  // picks a random empty location and then checks if the ship fits
   const changeBoard = function (boardobj, currentship) {
     randomLocation = pickLocation(boardobj.coordinates).split(",");
     row = Number(randomLocation[0]);
@@ -206,13 +211,10 @@ const placeShips = (function () {
     if (selectInitialPlacement === "fails check" || !selectInitialPlacement) {
       return changeBoard(boardobj, currentship);
     }
-    // if (!selectInitialPlacement) {
-    //   console.log("error");
-    //   return "ERROR ERROR";
-    // }
     const currentshiplength = currentship.length;
     const boatOrientation = selectInitialPlacement[2];
     let coordinatesToChange = [];
+    // after finding a good starting point and having chosen the boat orientation, places the ship on the board by changing the object key value at each coordinate.
     if (boatOrientation === "vertical") {
       for (let i = 0; i < currentshiplength; i++) {
         const newcoord = [
@@ -242,6 +244,7 @@ const placeShips = (function () {
   return { changeBoard };
 })();
 
+// creates a board, a fleet and places the ships on the board for a player; returns the board with the ships location
 const setupBoard = function (player, playerobj) {
   let newBoard = createGameboard(player);
   const shipFleet = createShipFleet(player);
@@ -253,7 +256,6 @@ const setupBoard = function (player, playerobj) {
     placeShips.changeBoard(newBoard, shipFleet[3]);
     placeShips.changeBoard(newBoard, shipFleet[4]);
   }
-  //displayboard(newBoard);
   return newBoard;
 };
 
@@ -262,6 +264,7 @@ const setupPlayers = function (player, ships, gameboard, advgameboard) {
   return newplayer;
 };
 
+// for a certain attacker and victim, checks the status of the victim board for an attack at a certain coordinate; if the status on the board is "1", checks which boat is at that location and gives it a "hit"
 const attack = function (attacker, victim, coordinates) {
   const victimsBoard = victim.gameboard;
   const attackerAdvBoard = attacker.advgameboard;
@@ -269,18 +272,11 @@ const attack = function (attacker, victim, coordinates) {
   const boardStatusOnCoordinates = victimsBoard.coordinates[coordinates];
   const transformedCoordinates = [coordinates[0] + "," + coordinates[1]];
   if (boardStatusOnCoordinates === 1) {
-    //console.log("hit");
     for (let i = 0; i < victimsFleet.length; i++) {
       const arrayOfCoordinates = victimsFleet[i].coordinates.flat();
       const isItThisShip = arrayOfCoordinates.includes(
         transformedCoordinates[0]
       );
-      // console.log(victimsFleet[i]);
-      // console.log("coordinates");
-      // console.log(coordinates);
-      // console.log("transformed");
-      // console.log(transformedCoordinates);
-      // console.log("isit" + isItThisShip);
       if (isItThisShip) {
         const hitIndex = arrayOfCoordinates.findIndex(
           (element) => element === transformedCoordinates[0]
@@ -289,11 +285,10 @@ const attack = function (attacker, victim, coordinates) {
         victimsBoard.coordinates[coordinates] = "x";
         attackerAdvBoard.coordinates[coordinates] = "x";
         victimsFleet[i].hits;
+        // tracks if a ship has sunk and returns the ship's name if true; if there are 5 sank ships of the same player returns gameover
         if (victimsFleet[i].sunk) {
-          //console.log("ship sunk: " + victimsFleet[i].name);
           const sunkenShips = countSunkenShips(victimsFleet);
           if (sunkenShips === 5) {
-            //console.log("gameover");
             return ["gameover", victimsFleet[i].name];
           } else {
             return ["hit", victimsFleet[i].name];
@@ -303,7 +298,7 @@ const attack = function (attacker, victim, coordinates) {
       }
     }
   } else {
-    //console.log("miss");
+    //if the status on board was "0", updates it to "m" when a player misses
     victimsBoard.coordinates[coordinates] = "m";
     attackerAdvBoard.coordinates[coordinates] = "m";
     return ["miss", ""];
@@ -322,52 +317,13 @@ const countSunkenShips = function (array) {
   return count;
 };
 
-const displayboard = function (currentboard) {
-  console.log(" ");
-  const coord = currentboard.coordinates;
-  console.log(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, "d");
-  for (let i = 1; i <= 10; i++) {
-    if (i === 10) {
-      console.log(
-        "d",
-        coord[i + "," + 1],
-        coord[i + "," + 2],
-        coord[i + "," + 3],
-        coord[i + "," + 4],
-        coord[i + "," + 5],
-        coord[i + "," + 6],
-        coord[i + "," + 7],
-        coord[i + "," + 8],
-        coord[i + "," + 9],
-        coord[i + "," + 10]
-      );
-      break;
-    }
-    console.log(
-      i,
-      coord[i + "," + 1],
-      coord[i + "," + 2],
-      coord[i + "," + 3],
-      coord[i + "," + 4],
-      coord[i + "," + 5],
-      coord[i + "," + 6],
-      coord[i + "," + 7],
-      coord[i + "," + 8],
-      coord[i + "," + 9],
-      coord[i + "," + 10]
-    );
-  }
-};
-
+// auxiliar variables for helping the computer
 let lastcoord = [];
 let possiblebetterlocations = [];
 
+// gets a location from player A and attacks B at that location
 function gameLoop(location, playerA, playerB) {
   let stop = false;
-  //player A picks a coordinate
-
-  //console.log("A Location selected: ");
-  //console.log(location);
   // player A attacks
   const locationtemp = location.toString().split(",");
   const finallocation = [Number(locationtemp[0]), Number(locationtemp[1])];
@@ -375,6 +331,7 @@ function gameLoop(location, playerA, playerB) {
   const hitormissAvsB = attackResult[0];
   const sunkStatusB = attackResult[1];
 
+  // if it's a hit, adds a class to the hit div
   if (hitormissAvsB === "hit" || hitormissAvsB === "gameover") {
     const transformcoordtoidLocation = location.toString().replace(",", "-");
     const otherplayerboard = document.getElementById("otherplayer");
@@ -385,6 +342,7 @@ function gameLoop(location, playerA, playerB) {
     findDivOther.classList.add("hit");
   }
 
+  // when a ship has sunk, updates the dom with the name of the ship
   if (sunkStatusB !== "" && sunkStatusB !== "standing") {
     const sunkedshipname = sunkStatusB.toLowerCase();
     const sunkedshipH3Id = sunkedshipname + "Adv";
@@ -410,8 +368,7 @@ function gameLoop(location, playerA, playerB) {
   }
 
   //  player B picks a coordinate
-  console.log("player B picks");
-  console.log(lastcoord);
+  // the first coordinate is picked randomly. if the coordinate was a hit, the computer tries every possible location around the hit
   let selectedLocation;
   if (lastcoord.length === 0) {
     const selectedLocationRaw = pickLocation(
@@ -455,9 +412,8 @@ function gameLoop(location, playerA, playerB) {
       possiblebetterlocations = possiblebetterlocations.slice(1);
     }
   }
-  //console.log("B Location selected: " + selectedLocation);
+
   //player B attacks
-  //console.log(selectedLocation);
   const transformcoordtoid = selectedLocation.toString().replace(",", "-");
   const mainplayerboard = document.getElementById("mainplayer");
   const findDiv = mainplayerboard.querySelector(`[id="${transformcoordtoid}"]`);
@@ -465,15 +421,16 @@ function gameLoop(location, playerA, playerB) {
   const hitormissBvsA = attackResultComputer[0];
   const sunkStatusA = attackResultComputer[1];
 
+  // saves the coordinate if the chose location was a hit and resets the possible better locations
   if (
     hitormissBvsA === "hit" &&
     (sunkStatusA === "standing" || sunkStatusA === "")
   ) {
     lastcoord.push(selectedLocation[0] + "," + selectedLocation[1]);
-    console.log(lastcoord);
     possiblebetterlocations = [];
   }
 
+  //visually the computer takes 1s to play
   setTimeout(function () {
     domPlayerB(hitormissBvsA, findDiv, sunkStatusA);
   }, 1000);
@@ -505,9 +462,9 @@ function startGame(player1, player2) {
   return [player1, player2];
 }
 
-//x,y = 1,2
 function pickBetterCoord(existingCoord, player) {
   let coordArray = [];
+  // when there is only one coordinate, checks at the 4 locations around the coordinate
   if (existingCoord.length === 1) {
     const splitIt = existingCoord[0].split(",");
     const initialX = Number(splitIt[0]);
@@ -538,6 +495,7 @@ function pickBetterCoord(existingCoord, player) {
         coordArray.push(west);
       }
     }
+    // if there are more than 1 coordinate, checks the direction of the ship and then looks for possible locations on that direction
   } else {
     const arrayCoord = existingCoord;
     const first = arrayCoord[0].split(",");
@@ -596,14 +554,3 @@ function pickBetterCoord(existingCoord, player) {
 const sorter = function (a, b) {
   return a - b;
 };
-
-//startGame();
-
-// let loopit = gameLoopPrompt();
-// while (!loopit) {
-//   loopit = gameLoopPrompt();
-// }
-
-//ai smarter:
-// ignore empty spaces without other spaces around
-// pick the larger ship not found yet and find space for it on the board: pick the middle square first

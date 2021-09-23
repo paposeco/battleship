@@ -45,8 +45,3 @@ const createShipFleet = function (player) {
   const shiparray = [carrier, battleship, destroyer, submarine, patrolboat];
   return shiparray;
 };
-
-// for node
-//module.exports = shipFleet;
-
-// ships should probably have a unique id

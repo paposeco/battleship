@@ -13,5 +13,3 @@ const createPlayer = function (player, ships, gameboard, advgameboard) {
   const newplayer = new Player(player, ships, gameboard, advgameboard);
   return newplayer;
 };
-
-//module.exports = createPlayer;
