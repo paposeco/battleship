@@ -1,5 +1,7 @@
 # Battleship Game implementation for the Odin Project
 
+[Live Demo](https://paposeco.github.io/battleship/)
+
 ## Features
 
 The player is asked to place 5 ships: carrier (5), battleship (4), destroyer(3), submarine(3) and patrolboat (2). Once the fleet is placed the game begins. The player tries to hit the computer fleet by clicking on an empty location on the computer's board; the computer plays next. The game continues until a player manages to sink the other player's fleet.
